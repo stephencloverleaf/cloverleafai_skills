@@ -6,7 +6,7 @@ description: >-
   surface people they already know who are changing jobs plus warm paths into the agencies
   involved. Read-only: it reports and never writes to a CRM. Trigger phrases: "any new
   police chiefs", "who is starting a new chief role", "check for chief transitions in
-  <states>", "are any of my contacts becoming chiefs", "run the chief signal", or any ask
+  STATE_CODES", "are any of my contacts becoming chiefs", "run the chief signal", or any ask
   about law-enforcement leadership changes as a prospecting signal, even without naming
   Cloverleaf or a CRM.
 ---
@@ -80,7 +80,7 @@ Name-recovery rules learned the hard way:
 - Speech-to-text garbles names. Expect first-only ("Ron"), surname-only ("Davila"), and
   truncated ("Gerald L.") forms. Surface the chief anyway. Flag what is missing and let
   scoring carry the uncertainty.
-- **Separate police chiefs from fire and assistant chiefs.** "Chief <X>" hits include fire
+- **Separate police chiefs from fire and assistant chiefs.** "Chief TOPIC" hits include fire
   chiefs. Require police or PD context before treating someone as a police chief.
 - Confirm the jurisdiction from transcript content, not the organization label, which can
   name the wrong place.

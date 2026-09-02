@@ -17,7 +17,7 @@ the field as it is and say so in the report.
 ## How enumeration actually works
 
 **In Claude Code, you get names but not descriptions.** The connector's tools arrive in
-the deferred tool list under an `mcp__<server-id>__` prefix that differs per account.
+the deferred tool list under an `mcp__SERVER_ID__` prefix that differs per account.
 Loading them with ToolSearch returns a schema of `{"type": "object"}` and a description
 that is only the tool name repeated (verified for the Cloverleaf connector on 2026-09-02).
 So enumerate by name from the deferred list, and get descriptions and parameters from one
@@ -55,7 +55,7 @@ Record the bare tool name, dropping the server id prefix.
 
 4. **Document each new tool.** Append a row to the tool matrix in the connector's
    reference skill (`cloverleaf-mcp-operations` for Cloverleaf, the analogous skill for
-   another connector), formatted `| <tool> | <today's date> | <description> |`. Then list
+   another connector), formatted `| TOOL_NAME | <today's date> | DESCRIPTION |`. Then list
    in your report which workflow skills could use it and why. Do not rewrite a workflow
    skill to adopt a new tool unless the user asks.
 
@@ -64,7 +64,7 @@ Record the bare tool name, dropping the server id prefix.
    the name, rewrite each mention to the correct current tool by reading the surrounding
    context, and re-run the drift script.
 
-6. **Commit on a branch** named `connector-refresh/<YYYY-MM-DD>`, with a dated entry in
+6. **Commit on a branch** named `connector-refresh/DATE`, with a dated entry in
    `CHANGELOG.md` describing what the connector changed and what you edited. Do not add or
    bump a `version` field in `plugin.json` or the marketplace file: Claude Code resolves a
    git based marketplace by commit, so every merge to the default branch is a new version,
