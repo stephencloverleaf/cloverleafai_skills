@@ -18,7 +18,8 @@ Every `creatorType: "anthropic"` skill was excluded: `consolidate-memory`, `docx
 
 The union of user-created skills is 20, not 24: 5 exist only in the personal library
 (`cloverleaf-profile-setup`, `government-entity-profile`, `humanizer`, `rfp-timeline`,
-`territory-monitor`), 4 only in the work library (`cloverleaf-ai-profile`,
+`territory-monitor`), 4 only in the work library (`cloverleaf-ai-profile`, merged into
+`vendor-profile` on 2026-09-02 and deleted, see "Optimization pass, 2026-09-02" below;
 `cloverleaf-mcp-operations`, `cloverleaf-signals-email`, `police-chief-transitions`), and
 **11 in both**. The build brief expected 13 in both; the manifests say 11. Adding the 3
 Claude Code skills and the new `refresh-connectors` gives 24. No user-created skill in either
@@ -48,9 +49,10 @@ content those local edits carried was ported in by hand.
 | vendor-profile | 2026-07-07 | 2026-07-02 | personal | `references/term-banks.md`, which the personal copy cites but does not carry. |
 
 Skills taken whole from one source: `cloverleaf-profile-setup`, `government-entity-profile`,
-`humanizer`, `rfp-timeline`, `territory-monitor` (personal); `cloverleaf-ai-profile`,
-`cloverleaf-mcp-operations`, `cloverleaf-signals-email`, `police-chief-transitions` (work);
-`enrichment-provider`, `sales-communication`, `profile-account` (Claude Code).
+`humanizer`, `rfp-timeline`, `territory-monitor` (personal); `cloverleaf-ai-profile` (work,
+merged into `vendor-profile` on 2026-09-02 and deleted, see "Optimization pass, 2026-09-02"
+below), `cloverleaf-mcp-operations`, `cloverleaf-signals-email`, `police-chief-transitions`
+(work); `enrichment-provider`, `sales-communication`, `profile-account` (Claude Code).
 
 ## Per-skill detail
 
@@ -233,3 +235,244 @@ Revert it if the figure was deliberate.
 
 - `sales-communication`: `Cloverleaf_Email_Voice_Guide.md` was referenced by a local path that teammates do not have. The file is now vendored at `references/Cloverleaf_Email_Voice_Guide.md` and the reference points there. It describes Stephen's personal outreach voice; remove it from the plugin if that should stay personal.
 - `scripts/check_tool_drift.py`: two em dashes in output strings replaced with colons.
+
+## Optimization pass, 2026-09-02
+
+Two agents split the 13 remaining connector skills and ran an optimization pass against the
+live Cloverleaf AI MCP connector: one covered the search-layer skills, the other covered
+vendor, enrichment, presentation, and outreach. `python3 scripts/check_tool_drift.py` exits 0,
+0 FAIL, 62 WARN (all pre-existing unused Apollo tools), after both passes.
+
+### Per-skill changes
+
+**cloverleaf-mcp-operations**
+
+- Moved recipes to `references/recipes.md` and added `references/response-shapes.md` with the
+  live field lists from the verification calls below.
+- Folded purchase rows into the tool matrix with a `Verified` date column.
+- Kept rules 1 through 8 and added rule 9 (speaker attribution is inference from both
+  endpoints, sanitize `person.organization`) and rule 10 (`department` is the buyer on a
+  purchase row).
+- Absorbed vendor-search, acronym-collision, insight-layer, timestamp-drift, and
+  roster-contamination rules that previously lived only in Stephen's memory files.
+- Cut the "what changed since July" changelog section and the fixed-`states`-500 framing.
+- 442 to 163 lines plus 2 references.
+
+**cloverleaf-signal-search**
+
+- Dropped the duplicated 11-row tool matrix; the skill now names only the tools its procedure
+  uses.
+- Restructured guardrails to four: 0 own-vendor (with the footprint-mention trap folded in),
+  1 stage, 2 specificity, 3 who owns the problem (new).
+- Moved term banks, anchoring, ambiguity traps, and vendor-zero rules to
+  `references/query-craft.md`, and worked examples to `references/worked-examples.md`.
+- Recurring-sweep mechanics now defer to `territory-monitor` instead of being hosted here.
+- 510 to 207 lines plus 2 references.
+
+**document-signal-search**
+
+- Opens with a stage table: legislation is the upstream mandate, documents are the line item
+  through award, purchases are the award already made.
+- Added a federal-awards section with four caveats: award stage only, coverage beyond federal
+  unverified, `department` is the buyer, no `cloverleaf_url`.
+- Moved vocabulary, boilerplate traps, and cooperative-vehicle names to
+  `references/procurement-vocabulary.md`.
+- Added the 0.75 document score calibration.
+- 220 to 146 lines plus 1 reference.
+
+**rfp-timeline**
+
+- Removed three stale rules: never pass `states` on document search, a 25-meeting cap, and no
+  pagination on the tool.
+- Added `search-purchases` and `run-purchase-keyword-search` as Source C, noting a federal
+  award has no trustworthy Cloverleaf org id.
+- Trimmed the render section to point at `signal-dashboard` instead of restating hex codes.
+- 264 to 220 lines.
+
+**government-entity-profile**
+
+- Removed the `enrichment-provider` dependency and inlined three Apollo tools
+  (`apollo_organizations_enrich`, `apollo_mixed_people_api_search`, `apollo_people_match`)
+  with the credit-counter caveat and the async phone reveal.
+- Added the mixed-governing-body and roster-contamination checks, the `meeting_count` coverage
+  check, and "an insight sentence is never a quote".
+- 109 to 138 lines.
+
+**territory-monitor**
+
+- Was a pure redirect into a section of `cloverleaf-signal-search`; now stands alone.
+- Added a config block, a three-layer freshness model, four sweep layers (insights first,
+  spoken, procurement, watchlist orgs), a digest template, and a carry-forward block.
+- Switched to `list-organization-meetings` rather than `lookup-organization.last_published_at`
+  for freshness, per the verified defect.
+- Added the recess and coverage-gap honesty rule.
+- 34 to 119 lines.
+
+**refresh-connectors**
+
+- Added a "How enumeration actually works" section: in Claude Code the deferred list gives
+  names only, and ToolSearch returns `{"type": "object"}` with the tool name echoed as the
+  description, so descriptions come from the desktop connector view or a live validation
+  probe.
+- Updated the matrix row format to the three-column shape the ops file now uses.
+- 89 to 83 lines.
+
+**vendor-profile** (absorbed `cloverleaf-ai-profile`, folder deleted)
+
+- Merged in the predecessor's primary-industry line, products list, pain-points list, and
+  problem-anchored keyword pairs, now `anchored_terms` mapping to `mustIncludeTerms` plus
+  `proximity`.
+- Fixed a stale claim that `run-meeting-keyword-search` caps at 25 results with no pagination;
+  pagination is real (`perPage` 100, `page`).
+- Added vendor-search rules that make a zero publishable: one name per query, ASR spelling,
+  re-derive across meeting and document layers.
+- Inlined Apollo (`apollo_organizations_enrich`, `apollo_mixed_companies_search`,
+  `apollo_people_match`) with the credit caveat and the `apollo_users_api_profile` fix; removed
+  the `enrichment-provider` dependency.
+- Moved the Account Profile form block to `references/account-profile-fields.md`.
+- 289 to 259 lines.
+
+**opportunity-enrichment**
+
+- Added a "Verify before you enrich" section: jurisdiction from transcript content, speaker
+  names as inference from both endpoints, read a window, re-derive timestamps, duplicate
+  sessions, buyer-ownership test, awarded means dead.
+- Inlined the full Apollo mapping table, credit caveat, two-pass rule, and async phone reveal;
+  no `enrichment-provider` reference remains.
+- Added purchases as an award-stage cross-check only, with `department` as the buyer,
+  `organization_names` as the whole federal list on every row, no `cloverleaf_url`, `amount` 0
+  on modifications, null dates, federal-only as of 2026-09-02.
+- Output block now carries `speaker_confirmed` and cites `cloverleaf_url`.
+
+**signal-dashboard**
+
+- Rewrote the script's reader for the live `search-meetings` shape, `meeting_hits[]` plus
+  `meetings[]` with no `person` block, replacing the `{"results": [...]}` shape it was written
+  against. Added readers for `search-insights` and `search-documents`; kept the legacy path.
+- Removed link construction; cards cite `cloverleaf_url` verbatim.
+- Added a full-state-name to code map and a semantic-relevance scoring band, since live
+  discussion signals arrive with no speaker.
+- Tightened extraction after real-data false positives ("Master" as a vendor, "$0" amounts).
+- Moved input shapes to `references/input-shapes.md`.
+- 171 to 143 lines.
+
+**signal-outreach**
+
+- Added four pre-draft kill checks: speaker confirmed, stage open, buyer owns the problem,
+  quote read in context. Unmet means NOT READY TO SEND.
+- Dropped `app.cloverleaf.ai` links from outbound in favor of a plain source line, keeping
+  `cloverleaf_url` as an internal citation. No early-signal claim without two dated meetings.
+- Rewrote Mode B to the three-move shape with the standard closer ("Cloverleaf AI pulls leads
+  like this every day...").
+- Added `references/outreach-checklist.md` and the conditional `sales-communication` or
+  `humanizer` load.
+
+**demo-mcp**
+
+- Chain is now the five plugin skills in order, with `signal-outreach` as phase 5 rather than
+  an optional encore.
+- Removed the `cloverleaf-ai-profile` mention and the `/mnt/user-data/outputs/` and other local
+  paths.
+- Added the guardrails inline: date window, never search the vendor's own name, reject awarded
+  or out-to-bid, buyer-ownership, cite `cloverleaf_url`, never print 45,000+.
+
+**police-chief-transitions**
+
+- Checked the tool sequence against the ops reference: bare tool names (was
+  "Cloverleaf AI:run-meeting-keyword-search"), pagination, `startDate`/`endDate` as the
+  `daysBack` alternative, dedupe, cite `cloverleaf_url`.
+- Made the Salesforce step conditional: without a CRM connector, it delivers the transition
+  list with warm-path suggestions instead.
+- Added the speaker-attribution and wrong-jurisdiction checks.
+
+### Live verifications, 2026-09-02
+
+15 live calls against the connected Cloverleaf AI account (a 15-call budget on one agent, plus
+10 on the other), no transcript-content calls:
+
+| Tool | Parameters | Result |
+|---|---|---|
+| `search-insights` | `searchTerm="cybersecurity"` | 4 insights, all 0/10 gate-excluded; envelope `{insights[], total}`; per row `cloverleaf_url`, `summary`, `result`, `state_name`, no state code. |
+| `search-insights` | `searchTerm="firewall"` | `{insights: [], total: 0}`. |
+| `search-insights` | `searchTerm="cyber"` | 5 rows, all 0/10 gate-excluded; `result_truncated: true` with an undocumented `includeFullResult` parameter. |
+| `search-purchases` | `query="firewall network security contract award"` | `{total_hits:100, purchases[]}`, no `cloverleaf_url`; every row carried the identical whole federal `organization_ids`/`organization_names` list; `department` is the real buyer; `amount` 0 on modifications; `start_date`/`end_date` null. |
+| `run-purchase-keyword-search` | `terms="firewall"` | "expected array, received string": confirms `terms` is an array. |
+| `search-purchases` | `query`, `states="TX"` | "expected array, received string": confirms `states` exists and is an array. |
+| `lookup-organization` | `query="Travis County, TX"` | `{matched, organizations[], state}`; one org showed `last_published_at: 2028-07-07`. |
+| `search-documents` | `query="contract award or renewal for firewall and network security equipment"` | `{total_hits:100, total_document_hits:61, documents[]}` with `cloverleaf_url`, `chunks[]`; top hit 0.785, a real Fortinet/CDW-G award. |
+| `search-documents` | query plus `startDate`/`endDate` window | 67 document hits; re-surfaced a $4,859,039 CDW-G Palo Alto award. |
+| `search-meetings` | query re: replacing old firewalls | `{meeting_hits[], meetings[]}`; `transcripts[]` carries only `id, text, start_time, score`, no `person` block; `spam_certainty` 0.8-0.95 on clean meetings. |
+| `search-meetings` | query plus `startDate` 2026-08-28, `endDate` 2026-09-02 | 62 meeting hits, same no-`person` shape; `state` is a full name. |
+| `list-organization-meetings` | `organizationId="1242"` | "expected number, received string": confirms the parameter name and numeric type. |
+| `run-document-keyword-search` | `terms="firewall"` | "expected array, received string": confirms `terms` is an array. |
+| `perPage`, `states` on keyword-search tools | various | rejected as "expected number/array, received string": every parameter is sent as a string in this harness, so no array- or number-typed parameter is callable from it. |
+| ToolSearch `select:` on 9 Cloverleaf tools | none | every schema returned `{"type": "object"}` and the description was the bare tool name. |
+
+### Contradictions found and resolved
+
+1. The `cloverleaf-rfp-data-gap` memory said the purchase tools were "not yet in
+   `cloverleaf-mcp-operations`". Stale as of this pass's purchase-row edit; resolved in favor
+   of the repo.
+2. The ops file said `search-insights` is "always the first call, free"; a daily-summary defect
+   note said never trust the feed. Both kept, scoped: free and first, but the score is a label
+   on everything ingested, not a threshold, and an insight is a lead, not a citation.
+3. The ops calibration said semantic score 0.80 or higher is strong. Live document and purchase
+   hits top out at 0.785 and 0.789 on good queries. Calibration split: transcripts at 0.80,
+   documents and purchases from about 0.75, ranked by `best_score`.
+4. `cloverleaf-signal-search` claimed transcript results carry a `person` name, org, and title.
+   True for `run-meeting-keyword-search`, false for `search-meetings`, which returns no
+   `person` key at all. Recorded per tool in `references/response-shapes.md`.
+5. `rfp-timeline` said document search 500s on `states` and keyword search has no pagination.
+   Both contradicted by the ops reference and by live behavior; the ops reference won and
+   `rfp-timeline` was corrected.
+6. `signal-dashboard` and `opportunity-enrichment` each claimed a fixed step number (search,
+   dashboard, enrich, outreach), conflicting with the `demo-mcp` chain order. Step numbers were
+   removed: the dashboard runs whenever signals exist, enrichment runs between the sweep and
+   outreach, and `demo-mcp` enriches before rendering so cards ship complete.
+7. The ops reference's `references/response-shapes.md` describes the `run-document-keyword-search`
+   envelope as flat hit records with `highlights[]` and `cloverleaf_url`; the shipped
+   `signal-dashboard` script assumed an Elasticsearch `hits.hits[]` shape with
+   `highlight.plain_text[]`. Neither agent could call the tool live, so the reader now accepts
+   both shapes.
+8. The 25-meeting cap claimed in `vendor-profile` contradicted the ops reference, which
+   documents real pagination. The ops reference won.
+
+### Open questions for Stephen
+
+1. Does `search-purchases` hold anything but `purchase_dataset_id: 1` (federal)? Every sampled
+   row was federal. If SLED award data exists, the skills should say so; until confirmed, they
+   say the opposite.
+2. Purchase rows have no `cloverleaf_url` and no per-award org id. Is there a platform page for
+   an award, or is `source_row_id` genuinely the only citation?
+3. `run-purchase-keyword-search` published no parameter schema. Confirmed `terms` is an array;
+   does it also take `mustIncludeTerms`, `proximity`, `sortBy`?
+4. One org in the Travis County probe returned `last_published_at: 2028-07-07`. Data defect
+   worth logging in the wiki, or expected?
+5. `territory-monitor` now owns the recurring sweep outright. Should the scheduled routines in
+   `routines/` be repointed at it?
+6. `search-insights` on the connected account returns only `stephen+airsight@cloverleaf.ai`
+   counter-UAS insights, all 0/10. Is that the account colleagues will install against? If so,
+   the "insights first" opening move will look empty in their first demo.
+7. Mode A outreach (vendor rep to government buyer) has no standard closer, only the
+   interest-oriented CTA from the playbook. The 8/24 closer is scoped to Mode B. Do you want a
+   house closer for the vendor rep too?
+8. `signal-dashboard` drops insight rows scored 0/10. Confirm that is right, since it is most
+   of what the live feed returns.
+
+## Skills moved out of the plugin
+
+Ten skills moved out of the `cloverleaf-sales` plugin and out of this repo on 2026-09-02,
+because they cover brand, copy, playbook, Gmail, browser automation, or a personal vault
+rather than a call to the Cloverleaf AI or Apollo.io MCP connector. They now live at
+`~/Developer/skills-personal/` on Stephen's Mac and are not committed anywhere:
+
+- `cloverleaf-copy-editor`
+- `cloverleaf-profile-setup`
+- `cloverleaf-signals-email`
+- `enrichment-provider`
+- `humanizer`
+- `logo-usage-guidelines`
+- `product-marketing-framing`
+- `profile-account`
+- `sales-communication`
+- `typography-brand-guidelines`

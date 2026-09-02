@@ -11,7 +11,7 @@
     {
       "name": "cloverleaf-sales",
       "source": "./plugins/cloverleaf-sales",
-      "description": "Find pre-RFP buying signals in government meetings, enrich them into opportunities, and write the outreach, under the house sales-communication standard.",
+      "description": "Connector skills for Cloverleaf AI sellers: find pre-RFP buying signals in government meetings, enrich them into opportunities, present them, and write the outreach.",
       "author": {
         "name": "Stephen White",
         "email": "stephen@cloverleaf.ai"

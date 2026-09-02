@@ -1,171 +1,143 @@
 ---
 name: signal-dashboard
 description: >-
-  Turn Cloverleaf signals (or raw `search-meetings` / `run-document-keyword-search` output)
-  into a polished, sortable, filterable HTML sales dashboard branded in Cloverleaf
-  navy and Sky accent. Handles BOTH discussion signals (what officials say, from transcripts)
-  and procurement signals (what they're buying — vendors, dollar amounts, RFP/renewal
-  stage, from documents), and can mix them on one board. Use this skill whenever the
-  user has found signals and wants to SEE, sort, triage, or present them — phrases like
-  "build a dashboard," "show me these leads," "make this easy to sort through," "put the
-  signals in a view," or right after running a Cloverleaf search in a demo. This is step
-  2 of the demo workflow (search → DASHBOARD → enrich → outreach). Produces one
-  self-contained .html file that opens instantly offline — no internet needed in the room.
+  Turns Cloverleaf signals into one self-contained, sortable, filterable HTML sales
+  dashboard branded in Cloverleaf navy and Sky, using the bundled build script. Reads live
+  connector output directly from search-meetings, search-insights, search-documents, and
+  run-document-keyword-search, or a normalized signals list, and handles both discussion
+  signals (what officials say) and procurement signals (what they are buying) on one board.
+  Trigger phrases: "build a dashboard", "show me these leads", "make this easy to sort
+  through", "put the signals in a view", or right after a Cloverleaf search in a demo. Runs
+  once signals exist, either as a fast triage board straight off the sweep or as the final
+  board after opportunity-enrichment fills in budget, stage, and contacts. The output file
+  opens offline, so it works in a room with no internet.
 ---
 
-# Signal Dashboard
+# Signal dashboard
 
 ## What it produces
 
-A single self-contained `.html` file (no CDNs, no internet — safe for a conference
-room with bad wifi) that shows every signal as a scannable card, ranked by lead score,
-with live sort and filter. The audience instantly sees: which jurisdictions are Hot,
-who said what, whether you have their email/phone, and what to do next. This is the
-"so it's not just a search box — it's a workflow" beat of the demo.
+One self-contained `.html` file with no external scripts, stylesheets, or images. Every
+signal is a scannable card ranked by lead score, with live sort and filter. The reader sees
+which jurisdictions are Hot, who said what, whether contact details exist, and what to do
+next.
 
-**Brand palette (official — from the Cloverleaf AI brand guidelines; this is the canonical list, do not invent values).** The script bakes these in:
-- **Ink Navy `#1B232E`** — primary dark surface (header, stat numbers, text accents)
-- **Sky `#CCF1FD` / Sky-deep `#A9E3F4`** — the signature accent (badge fills, chips, borders). It's *light*, so use it as a background/border, not as text on white.
-- Cream `#F3F1EA`, Near-Black `#16171B`, White `#FFFFFF`, Stone `#8C8A84`, Slate `#9AA1AA`
-- **There is NO Cloverleaf green.** The old `#2E8B57` (and navy `#1B2A4A`) were fabricated and off-brand — never reintroduce them.
-- **Logo:** black or white official lockup only — never recolored, and never a stand-in shape like a colored dot. The script embeds the official white logo in the navy header.
+## Run the bundled script
 
-## The fastest path: use the bundled script
-
-`scripts/build_dashboard.py` does the rendering. It accepts raw Cloverleaf output
-**directly**, so in a live demo you can go from search → dashboard in one step.
+`scripts/build_dashboard.py` does the rendering and accepts raw connector output directly,
+so a live demo goes from search to dashboard in one step.
 
 ```bash
 python3 scripts/build_dashboard.py INPUT.json -o signal_dashboard.html \
-  --title "Cybersecurity Signals — <Prospect Name>" \
+  --title "Cybersecurity signals: <Prospect>" \
   --subtitle "Pre-RFP buying signals from live government meetings"
 ```
 
-`INPUT.json` can be any of:
+`INPUT.json` can be the saved output of `search-meetings`, `search-insights`,
+`search-documents`, or `run-document-keyword-search`, or a normalized `{"signals": [...]}`
+list. The reader dispatches on the top-level key. For the field-by-field shape of each
+input, the normalized signal schema, and which fields each card renders, read
+**`references/input-shapes.md`**.
 
-1. **Raw transcript `search-meetings` output** — the `{ "results": [...] }` from the connector. The
-   script collapses each meeting to its single best signal line, prefers lines with a named
-   speaker + contact info, and pulls the jurisdiction from the speaker's org. These are
-   tagged `discussion` signals.
-2. **Raw `run-document-keyword-search` output** — the `{ "object_api_response": {...} }`
-   from the document tool. The script keeps only documents where a real topic term hit
-   (dropping procurement-boilerplate-only matches, matching the `document-signal-search`
-   rule) and tags them `procurement`. **Best-effort** extraction pulls a dollar amount,
-   stage, and vendor from the highlight text — see the caveat below.
-3. **A normalized signals list** — `{ "signals": [ {...}, ... ] }` (or a bare `[...]`). Use
-   this for enriched or model-read signals. Set `signal_type` to `"discussion"` or
-   `"procurement"`; for procurement cards add `vendor`, `amount`, `procurement_stage`,
-   `doc_type`. Schema is documented at the top of `build_dashboard.py`.
+Then present the file so the user gets a clickable link, or open it in a browser.
 
-A single board can mix discussion and procurement signals — concatenate them into one
-`{"signals":[...]}` list, or build two and combine. When both types are present, the
-dashboard shows a Discussion/Procurement filter and a Procurement count stat; with one
-type, those hide themselves.
+## Rules the board depends on
 
-Then show it with `present_files` (preferred — gives Stephen a clickable card), or open it
-in the browser.
+- **Cite `cloverleaf_url`, never build a link.** Every meeting, document, and insight
+  carries one. The script copies it verbatim and shows a plain meeting ID when it is
+  missing. A link assembled from an ID can point at a page that does not exist.
+- **Read the model into the flagship cards.** Auto-extraction of vendor, dollar amount, and
+  stage from OCR'd agenda text is deliberately conservative: it leaves a field blank rather
+  than guess, because a wrong dollar figure on a card is worse than none. For the handful of
+  signals that matter, read the passage yourself and pass `vendor`, `amount`, and
+  `procurement_stage` on a normalized signal. Use raw auto-ingest for fast triage of the
+  whole result set.
+- **`search-meetings` returns no speaker.** Verified live 2026-09-02: transcript chunks
+  carry only an ID, text, start time, and score. Cards from that tool are speaker-blank by
+  design. Fill the name from `list-contacts` or `opportunity-enrichment`, and only after
+  confirming it, since speaker attribution anywhere in the platform is inference rather than
+  data.
+- **Documents carry no organization name.** `search-documents` and
+  `run-document-keyword-search` return `organization_id` only, so those cards read
+  "Org #<id>" until you resolve the name and set `jurisdiction`. Resolving it also turns the
+  state filter back on for those cards.
+- **Filter before you present.** Drop spam rows, drop duplicate uploads of the same meeting
+  (dedupe on organization, title, and date, never on meeting ID alone), drop federal rows
+  when federal is out of scope, and drop any signal naming the vendor you sell for as already
+  contacted, demoed, or quoted. Label the stage on document hits, which are late-stage by
+  nature.
+- **The state filter needs a `, ST` suffix** on the jurisdiction. The script adds it from the
+  meeting's state name; normalized signals you write by hand need it too.
 
-### Procurement extraction: trust the model over the regex for flagship cards
+## Lead scoring
 
-Raw documents are OCR'd agenda text — often two unrelated line items in one block. The
-script's auto-extraction is deliberately **conservative: it leaves `vendor`/`amount` blank
-rather than guess wrong** (a wrong dollar figure on a card is worse than none). It reliably
-catches clean phrasings ("Agreement with PKI Solutions LLC… Not-to-Exceed $337,500") but
-will miss or blank a mangled one (e.g. a Bitdefender renewal interleaved with a paving
-invoice — it'll get the vendor and stage but may blank the amount).
+If a signal has no explicit `score`, the script computes one from 0 to 100. The rubric
+depends on signal type, because a procurement signal has no speaker.
 
-So for the **handful of signals that matter in a demo**, don't rely on the regex: read the
-highlight passage yourself, pull the right `vendor` / `amount` / `procurement_stage`, and
-pass them as a normalized `signals` entry (path 3). That's the reliable path and it takes
-seconds for the top few. Use raw-document auto-ingest (path 2) for fast, rough triage of the
-whole result set.
+**Discussion signals:**
 
-## Lead scoring (so Hot/Warm/Cool is consistent every demo)
+- Named decision-maker attached: +30.
+- Contact info attached: +25.
+- Recency: +20 within 30 days, +12 within 90, +6 within 180.
+- Substance: up to +25 from keyword density and quote length.
+- Semantic relevance, only when no speaker is attached: +30 at a best score of 0.80 or
+  above, +20 from 0.75, +10 from 0.70. This stands in for the missing person factors, since
+  the discovery tool returns no speaker.
 
-If a signal has no explicit `score`, the script computes one 0–100. The rubric **depends on
-signal type**, because a procurement signal has no speaker to score:
+**Procurement signals:**
 
-**Discussion signals** (transcripts) — the four factors the search skill uses:
-- **Named decision-maker** (+30) — a real person, ideally one who owns budget.
-- **Contact info present** (+25) — email or phone attached. This is the jackpot.
-- **Recency** (+20 / +12 / +6) — within 30 / 90 / 180 days.
-- **Substance** (up to +25) — keyword density (`hits`) and a specific, quotable statement.
+- Dollar figure present: +30.
+- Named vendor or incumbent: +18.
+- Stage: +25 for award, renewal, or agreement; +18 for RFP; +10 for a budget item.
+- Recency: +22 within 30 days, +14 within 90, +7 within 180.
+- Notice document: minus 8, since notices are usually publication boilerplate.
 
-**Procurement signals** (documents) — scored on deal mechanics, not people:
-- **Dollar figure present** (+30) — a real line item, not a passing mention.
-- **Named vendor/incumbent** (+18) — a displacement clock you can work.
-- **Stage** (+25 award/renewal/agreement · +18 RFP · +10 budget item) — how close to closing.
-- **Recency** (+22 / +14 / +7) — fiscal timing matters even more here.
-- **Notice penalty** (−8) — `notice` docs are usually publication boilerplate.
+Tiers for both: **Hot at 70 or above, Warm 45 to 69, Cool below 45.** Set `score` explicitly
+to override either rubric with human judgment.
 
-Tiers (same for both): **Hot ≥ 70**, **Warm 45–69**, **Cool < 45**. Badge fills: Hot uses a functional alert red, Warm uses the Sky accent (navy text), Cool uses grey — not a brand green. A
-contract about to be awarded ($ + vendor + "agreement") lands Hot with no named person —
-which is correct. Override either rubric by setting `score` explicitly when you want to
-reflect human judgment.
+## Brand
 
-## Make the cards demo-ready (optional but worth it)
+These values come from the Cloverleaf AI brand guidelines. The script bakes them in. Do not
+invent others.
 
-The raw search gives you quote + speaker + contacts. Two cheap upgrades make a card sing:
+- **Ink Navy `#1B232E`:** primary dark surface for the header, stat numbers, and text
+  accents.
+- **Sky `#CCF1FD` and Sky-deep `#A9E3F4`:** the signature accent for badge fills, chips, and
+  borders. Both are light, so use them as a background or border, never as text on white.
+- Cream `#F3F1EA`, Near-Black `#16171B`, White `#FFFFFF`, Stone `#8C8A84`, Slate `#9AA1AA`.
+- **There is no Cloverleaf green.** The old `#2E8B57` and navy `#1B2A4A` were fabricated and
+  off-brand. Never reintroduce them.
+- **Logo:** the official black or white lockup only, never recolored and never a stand-in
+  shape. The script embeds the official white logo in the navy header.
+- Badge fills: Hot uses a functional alert red, Warm uses Sky with navy text, Cool uses grey.
 
-- **Watch link → the Cloverleaf platform:** every card automatically renders a
-  "▶ Watch on Cloverleaf" link to `https://app.cloverleaf.ai/meetings/<meeting_id>` — the
-  platform page where the video **and** the AI insights live. The script builds this from
-  each signal's `meeting_id`, so you don't pass anything for it. A readable timestamp hint
-  (e.g. "quote ~5:07 in") is shown next to the link so the rep knows where to scrub. This is
-  the point: the rep lands inside Cloverleaf, not on a raw YouTube/source video. (If you ever
-  need to point a card somewhere specific, set `cloverleaf_url` to override; the legacy
-  `video_url` field still works as a last-resort fallback only when a signal has no
-  `meeting_id`.)
-- **`fit` and `next_action`:** one line each. `fit` = why this is a real opportunity;
-  `next_action` = the move. These come for free if you run `opportunity-enrichment`
-  first, but you can also write them inline.
+## Voice for anything you write on the board
 
-When you hand enriched signals (with `contacts`, budget, timeline) to the dashboard,
-keep the same `signals` schema and just add fields — the card shows what's present and
-ignores what isn't.
+The dashboard is customer-facing, so it is governed by the house sales-communication
+standard. If a `sales-communication` or `humanizer` skill is available in this session, load
+it first. Otherwise apply the checklist in `signal-outreach`'s
+`references/outreach-checklist.md`. Beyond that:
+
+- Direct and concrete. Real numbers, real names, real dates. No hedging, no generic SaaS
+  verbs such as leverage, streamline, unlock, or harness.
+- Short sentences. Active voice. Lead with the problem, not the product.
+- The company name is always "Cloverleaf AI", never "Cloverleaf" alone.
+- Oxford comma. No em dashes or en dashes. Use a period, comma, colon, or line break.
+- Never print "45,000+ agencies". The website says 70,000+ agencies monitored continuously.
+  Verify any platform figure before printing it.
+- Lead with findings. No "what I cut", "what I could not verify", or standing-caveat
+  sections. A single source and date line at the foot is fine.
 
 ## Watch-outs
 
-- **Big raw results:** a broad search can exceed the context window and get saved to a
-  file. Don't paste it — point the script at that file path directly; it streams fine.
-- **"Unknown jurisdiction":** appears only when a meeting has no identified speaker
-  anywhere (so search returned no org). Those are low-value anyway; drop them or infer
-  the jurisdiction from context. The strong, named-speaker signals always carry their org.
-- **Procurement signals show "Org #<id>", not a name.** `run-document-keyword-search`
-  returns `organization_id` but no jurisdiction name. For the cards that matter, resolve the
-  name (from your territory org-id map, or by cross-referencing a meeting-side hit for the
-  same org) and set `jurisdiction` on the normalized signal so the card reads "City of X, ST"
-  — that also re-enables the state filter for those cards.
-- **State filter** auto-populates only when jurisdictions include a `, ST` suffix.
-  `opportunity-enrichment` adds that; raw data may not have it, in which case the filter
-  hides itself and the free-text search box still covers jurisdiction.
-
-## Brand voice (Cloverleaf AI tone)
-
-The dashboard is customer-facing. Apply these rules to any text you write
-for cards, titles, subtitles, or annotations:
-
-- **Direct and confident.** No hedging ("might," "could potentially"). No
-  generic SaaS verbs (leverage, streamline, unlock, harness).
-- **Concrete specifics beat vague claims.** Use real numbers, real names,
-  real dates. "70,000+ government agencies" not "thousands."
-- **Short sentences are a feature.** Mix short punches with longer context.
-- **The company name is always "Cloverleaf AI"** — never "Cloverleaf" alone,
-  never "CloverLeaf."
-- **Oxford comma always.** No em dashes — use periods, colons, or line breaks.
-- **Active voice.** Lead with the problem, not the product.
-
----
+- **Large raw results** get written to a file rather than returned inline. Point the script
+  at that file path; it streams fine.
+- **"Unknown jurisdiction"** means the payload carried no organization for that row. Those
+  are low-value; drop them or set the jurisdiction yourself.
 
 ## Hand off
 
-The dashboard is the spine of the demo. Upstream, it ingests signals from:
-- **`cloverleaf-signal-search`** — discussion signals (transcripts), the guardrails, and
-  the recurring territory sweep mechanics.
-- **`document-signal-search`** — procurement signals (contracts, RFPs, renewals, dollars).
-- **`territory-monitor`** — a week's worth of new signals across a territory.
-
-From a chosen card, continue to:
-- **`opportunity-enrichment`** — deepen a signal into a full opportunity (budget, timeline, decision-makers).
-- **`signal-outreach`** — draft the email/LinkedIn/call script (quote the official for a
-  discussion signal; reference the contract line item for a procurement signal).
+Upstream, the board ingests signals from `cloverleaf-signal-search` (discussion),
+`document-signal-search` (procurement), and `territory-monitor` (a week across a territory).
+From a chosen card, continue to `opportunity-enrichment` to deepen it, then
+`signal-outreach` to draft the message.

@@ -1,149 +1,158 @@
 ---
 name: signal-outreach
 description: >-
-  Turn an enriched Cloverleaf signal into personalized, copy-paste-ready outreach —
-  email, LinkedIn note, and a call/voicemail script — that quotes the actual official
-  by name. Use this whenever the user wants to "write the email," "draft outreach,"
-  "reach out," "turn this into a message," or "what would I send" off a signal or lead.
-  Final step of the demo workflow (search → dashboard → enrich → OUTREACH). Two modes:
-  vendor→government (the warm lead) and Stephen→vendor-prospect (proof-of-value). This
-  is the "and it writes the outreach" mic-drop that shows the full workflow, not just search.
+  Turns an enriched Cloverleaf signal into copy-paste-ready outreach, an email plus a
+  LinkedIn note plus a call and voicemail script, anchored on what a named official
+  actually said in a public meeting. Runs in two modes: a vendor rep writing to the
+  government decision-maker, and a Cloverleaf AI seller writing to a vendor prospect using
+  a real signal from their territory as proof. Trigger phrases: "write the email", "draft
+  outreach", "reach out to them", "turn this into a message", "what would I send". Final
+  step of the demo workflow, after opportunity-enrichment. Carries the hard fails that stop
+  a draft from shipping: no fabricated quote or personalization, no Cloverleaf app links in
+  outbound, no early-signal claim without two dated meetings, and no awarded deal used as a
+  lead.
 ---
 
-# Signal Outreach
+# Signal outreach
+
+## Load the writing standard first
+
+If a `sales-communication` or `humanizer` skill is available in this session, load it first
+and let it govern voice and structure. Otherwise apply the checklist in
+**`references/outreach-checklist.md`**, which carries the hard fails and the preflight. Read
+it before you write, and run it again before you ship.
 
 ## Why this lands
 
-Cloverleaf's whole promise is that a rep can sound like an insider — referencing the exact
-thing a named official said in a public meeting — instead of a data scraper blasting a
-generic pitch. This skill produces that message. The power is in specificity: a real quote,
-a real name, real timing. Never water it down into "I hope this email finds you well."
+The promise is that a rep sounds like someone who was in the room, because they reference
+the exact thing a named official said in a public meeting. The power is specificity: a real
+quote, a real name, real timing. Never dilute it into "I hope this email finds you well".
 
 ## Pick the mode
 
-**Mode A — Vendor → government decision-maker (default).** The outreach a cyber vendor's rep
-would send to the official from the signal (the warm lead). This is the demo payoff: "watch
-Cloverleaf turn a council quote into the email your team sends Monday."
+**Mode A, vendor to government decision-maker.** What a vendor's rep sends to the official
+from the signal. This is the warm lead the whole workflow produces.
 
-**Mode B — Stephen → vendor prospect (proof-of-value).** Stephen's own outreach selling
-Cloverleaf, using a real signal from the prospect's SLED territory as undeniable proof. Great
-as a live "and here's how I'd pitch *you* this capability" close, or as a leave-behind.
+**Mode B, Cloverleaf AI seller to vendor prospect.** Outreach selling Cloverleaf AI, using a
+real signal from the prospect's own territory as proof. Say which mode you are writing.
 
-State which mode you're writing. When in doubt in a demo, do Mode A (it shows the product),
-then offer Mode B as the kicker.
+## Before you write: four checks that kill drafts
 
-## Principles (both modes)
+1. **Is the speaker confirmed?** Speaker attribution in the platform is inference, not data,
+   from both transcript endpoints. If the name has not been checked against minutes, a
+   roster, or a signature block, do not put it behind the quote. Write the body or the role
+   instead: "staff told the council", "the IT director said".
+2. **Is the stage open?** "Took quotes and awarded" or "the board approved" means the lead is
+   gone. Signals used in cold outreach must be open and pre-solicitation.
+3. **Does the recipient own the problem?** The people speaking must own the failing system
+   and hold budget for the category. Oversight hearings, public commenters, and advocacy
+   witnesses fail this even when the quote is specific and recent.
+4. **Is the quote read in context?** Quotes get spliced across timestamps and cut right
+   before the speaker disqualifies the claim. Read a window around it.
 
-- **Open with their words, not your product.** Quote the official accurately — it's public
-  record, so referencing it is fair game and credible. Get the quote right; don't paraphrase
-  into something they didn't say.
-- **One specific reason this is timely** — budget workshop happening now, audit follow-up,
-  grant window (SLCGP), a prior incident. Timing is the reason they reply.
-- **One CTA.** A 15-minute call before the budget locks. Not three asks.
-- **Short.** Email body ≤ ~110 words. LinkedIn note ≤ 300 characters. Voicemail ≤ 20 seconds.
-- **Plain language, peer tone.** Especially to government staff — respectful and helpful, not
-  salesy. No hype words, no exclamation points.
-- **Accuracy + opt-out** keep it effective and compliant: quote correctly, and honor
-  unsubscribe/do-not-contact requests. That's it — no boilerplate disclaimers.
+If a check fails and you cannot fix it from the data, label the draft **NOT READY TO SEND**
+and say which input is missing. Never fill the gap with an invention.
+
+## Principles for both modes
+
+- **Open with their words, not your product.** Quote accurately. It is public record, so
+  referencing it is fair and credible.
+- **One specific reason it is timely.** A budget workshop in progress, an audit follow-up, a
+  grant window, a prior incident. Timing is why they reply.
+- **One ask.** For a cold recipient, prefer an interest-oriented question over a calendar
+  request. A meeting ask works only when the offer is concrete and the timing is real.
+- **Short.** Email body 50 to 100 words, three or four short sentences. LinkedIn note under
+  300 characters. Voicemail under 20 seconds.
+- **Plain language, peer tone.** Especially to government staff: respectful and useful, not
+  salesy. No hype words and no exclamation marks.
+- **Write less technical.** The signal facts stay concrete. The commentary around them stays
+  simple, and there is no interpretive paragraph telling the reader what to think.
+- **Source without a link.** Never put an `app.cloverleaf.ai` link in outbound copy.
+  Recipients have no account, so the link hits a login wall. Name the jurisdiction, the
+  governing body, and the date in a plain source line instead. Keep the `cloverleaf_url`
+  with the draft as an internal citation, clearly marked as not part of the message.
+- **Never claim a decision started early without the earlier meeting.** The early-signal
+  argument needs two dated meetings, the discussion and the later buy. With one, you have no
+  argument, so do not make it.
+- **No dashes.** No em dashes or en dashes anywhere in outbound copy. Use a period, comma,
+  colon, or line break.
+- **Accuracy and opt-out** are the whole compliance story here: quote correctly, and honor
+  unsubscribe and do-not-contact requests. No boilerplate disclaimers.
 
 ## Templates
 
-### Mode A — Email (vendor rep → official)
+### Mode A, email to the official
+
 ```
 Subject: <the specific thing they raised>
 
-Hi <First> — I saw the <Mon DD> <meeting type> where you noted <short paraphrase or
-direct quote of the pain/project>. <One sentence: why that gap matters / what usually
-follows it.> We help <jurisdictions like theirs> <close that specific gap> — <one proof
-point or relevant funding path, e.g. SLCGP>. Worth 15 minutes before <the budget /
-RFP / next step> firms up?
+Hi <First>, I saw the <Mon DD> <meeting type> where <the speaker or body> noted <short
+direct quote or close paraphrase of the pain or project>. <One sentence on why that gap
+matters or what usually follows it.> We help <jurisdictions like theirs> <close that
+specific gap>, and <one verified proof point or funding path>. <One interest-oriented
+question.>
+
+Source: <Jurisdiction> <governing body>, <Mon DD, YYYY>
 
 <Name, title, company> · <phone>
 ```
 
-### Mode A — LinkedIn connection note
-```
-Hi <First> — caught <Jurisdiction>'s <Mon DD> <meeting> and your point about
-<the gap>. We help cities close exactly that. Would love to connect.
-```
+### Mode A, LinkedIn connection note
 
-### Mode A — Voicemail / call opener (≤20 sec)
 ```
-"Hi <First>, this is <Name> with <Company>. I was reviewing <Jurisdiction>'s
-<Mon DD> budget workshop and heard your point that the resiliency audit skipped
-<the gap>. That's the exact thing we help cities close, and there may be grant
-dollars for it. I'll follow up by email — reach me at <phone>."
+Hi <First>, caught <Jurisdiction>'s <Mon DD> <meeting> and the point about <the gap>. We
+help cities close exactly that. Would like to connect.
 ```
 
-### Mode B — Email (Stephen → vendor BD/capture lead)
+### Mode A, voicemail or call opener, under 20 seconds
+
 ```
-Subject: A <Jurisdiction> cyber budget signal in your <State> territory
-
-Hi <First> — quick proof of concept. On <Mon DD>, <Jurisdiction>'s <official title>
-said on the record that <the gap/pain> — during a budget workshop, i.e., as funding is
-being set. We surface these pre-RFP, with the official's name and contact, months before
-anything hits a bid portal. That's one of <N> cyber signals across your <State> territory
-this quarter. Want me to show you the full set?
-
-Stephen White · Cloverleaf AI
+Hi <First>, this is <Name> with <Company>. I was reviewing <Jurisdiction>'s <Mon DD>
+<meeting> and heard the point that <the gap>. That is the exact thing we help cities close,
+and there may be grant dollars for it. I will follow up by email. You can reach me at
+<phone>.
 ```
 
-## Worked examples (real Spokane Valley signal)
+### Mode B, email to a vendor prospect
 
-**Mode A — to Chad Knodel, IT Manager, City of Spokane Valley (cknodel@spokanevalleywa.gov):**
+Three moves and nothing else: the signal, one plain sentence on what Cloverleaf AI does, one
+direct ask.
 
-> **Subject: The pen-testing gap from your June 9 budget workshop**
->
-> Hi Chad — I caught the June 9 budget workshop where you noted last year's ransomware
-> resiliency audit didn't include network penetration testing. That's exactly the gap that
-> turns a "we're covered" into a breach six months later. We help WA municipalities close it
-> with continuous pen testing and validation, and several have funded it through the state's
-> SLCGP cybersecurity grant. Worth 15 minutes before the budget locks?
->
-> — <Rep name, title, company> · <phone>
+```
+Subject: <Jurisdiction> <category> signal in your <State> territory
 
-**Mode B — to a cyber vendor's SLED BD lead, using the same signal as proof:**
+Hey <First>,
 
-> **Subject: A Spokane Valley cyber budget signal you'd want**
->
-> Hi <First> — quick proof of concept. On June 9, Spokane Valley's IT Manager said on the
-> record that their ransomware resiliency audit skipped network pen testing — during a budget
-> workshop, as funding is being set. We surface these pre-RFP, with the official's name and
-> contact, months before an RFP. That's one of dozens of cyber signals across your SLED
-> territory this quarter. Want me to show you the <state> set?
->
-> Stephen White · Cloverleaf AI
+In <Jurisdiction>, <State> on <Mon DD>, <the speaker or body> <the concrete thing they said
+or the numbers they laid out>.
 
-Note how each email anchors on the **exact quote**, names a **specific timing reason**, and
-ends with **one CTA**. That's the formula — keep it.
+We are helping public sector teams know about opportunities in their accounts well before
+the word "RFP" is ever said.
 
-## Brand voice (Cloverleaf AI tone)
+Cloverleaf AI pulls leads like this every day. Want to see how it works using your
+territory?
 
-All outreach must match Cloverleaf AI's brand voice:
+Best,
+<Name>
+```
 
-- **Direct and confident.** No hedging, no qualifiers like "might," "could
-  potentially," "we believe." Urgency without alarm.
-- **Never corporate.** No generic SaaS verbs: leverage, streamline, synergize,
-  unlock, harness, enable, optimize. No hollow superlatives: innovative,
-  cutting-edge, best-in-class, game-changing.
-- **Short sentences are a feature.** Intentional fragments for emphasis are
-  on-brand. Mix short punches with longer explanatory context.
-- **Active voice throughout.** Lead with the problem, not the product.
-- **Concrete specifics.** Use real numbers, names, dates. "70,000+ government
-  agencies" beats "thousands of government agencies."
-- **The company name is always "Cloverleaf AI"** — never "Cloverleaf" alone,
-  never "CloverLeaf," never "Clover Leaf."
-- **Oxford comma always. No em dashes** — use periods, colons, or line breaks.
-- **Contractions encouraged** — they keep the tone human.
-
----
+Use "your accounts" instead of "your territory" for proposal-desk and contracts titles that
+carry no territory. Every signal-led cold email or follow-up ends on that closer. Never end
+on a bare "want the clip?" or "want the meeting detail?", which hides what Cloverleaf AI is
+and has left a prospect thinking the sender was a reseller bringing them a deal.
 
 ## Output
 
-In a demo, show the drafts inline (that's the wow). For takeaways, save all variants per
-signal to a `.md` file (e.g. `outreach_<jurisdiction>.md`) and present it so Stephen can
-copy-paste. You can also write the chosen email's first line into the signal's `next_action`
-so it shows on the dashboard card.
+Show the drafts inline. For a takeaway, save all variants per signal to a `.md` file, for
+example `outreach_<jurisdiction>.md`, and present it. You can also write the chosen email's
+first line into the signal's `next_action` so it shows on the dashboard card.
 
-Pulls from the enriched signal produced by **`opportunity-enrichment`** (quote, speaker,
-contacts, timing, grant). If those fields are thin, run enrichment first.
+Lead with the drafts. Do not add a section explaining what you rejected, what you could not
+verify, or standing caveats. A single source and date line at the foot is fine. If a draft
+is not shippable, say so in one line at the top and name the missing input.
+
+## Inputs
+
+Pulls from the enriched signal produced by `opportunity-enrichment`: quote, speaker and
+whether the name is confirmed, contacts, procurement stage, timing, grant, and
+`cloverleaf_url` for internal citation. If those fields are thin, run enrichment first.

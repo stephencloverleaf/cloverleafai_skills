@@ -5,9 +5,19 @@ match the live MCP servers, and that no skill references a tool that moved or di
 
 ## Schedule
 
-Mondays at 06:30 local time, in the Claude desktop app, in a session with the Cloverleaf AI
-and Apollo.io connectors attached. The desktop app is required: the connectors need a
-signed-in Claude session, so CI cannot do this.
+Mondays at 06:30 local time, in Claude Code or the Claude desktop app, in a session with the
+Cloverleaf AI and Apollo.io connectors attached. A signed-in Claude session is required, so CI
+cannot do this.
+
+Claude Code and the desktop app enumerate differently, and the `refresh-connectors` skill
+handles both. In Claude Code, the connector's tools arrive in the deferred tool list as names
+only; loading one with ToolSearch returns a schema of `{"type": "object"}` and a description
+that repeats the tool name. So enumeration there goes by tool name, and descriptions come
+from the desktop app's connector view (it shows the server's own descriptions) or from a live
+probe that calls the tool with one plausible parameter and reads the validation error. Claude
+Code also sends every parameter as a string, so a tool with a numeric or array parameter cannot
+be called there at all; the validation error itself ("expected array, received string") is how
+you confirm the parameter's name and type without spending a real query.
 
 ## The prompt to paste into the scheduled task
 

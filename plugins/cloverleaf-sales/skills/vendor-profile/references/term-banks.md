@@ -1,4 +1,4 @@
-# Term Banks — translating what a vendor sells into what officials say
+# Term banks: translating what a vendor sells into what officials say
 
 Use this to build the `primary_terms`, `competitor_terms`, and `funding_terms` in the
 search plan. Match the vendor to one or more categories below. If the vendor doesn't fit
@@ -7,84 +7,84 @@ budget-line phrasing) and write your own.
 
 **How to read each entry:**
 - **Pain terms** = what an official says when they have the problem (use these as `primary_terms`).
-- **Competitors/incumbents** = product/vendor names an official might say mid-evaluation (use as `competitor_terms`, separate run — a named competitor = active evaluation = displacement opening).
+- **Competitors/incumbents** = product/vendor names an official might say mid-evaluation (use as `competitor_terms`, separate run. A named competitor = active evaluation = displacement opening).
 - **Funding hooks** = grant/budget language that means money is moving (`funding_terms`).
 - **Fit** = jurisdiction types + buyer roles to score hits against.
 
-Officials describe **problems, projects, budgets, and incidents** — never product names.
-Always run 2–4 pain angles, not one term.
+Officials describe **problems, projects, budgets, and incidents**, never product names.
+Always run 2 to 4 pain angles, not one term.
 
 ---
 
 ## Contents
-1. Cybersecurity — Endpoint / EDR / XDR
-2. Cybersecurity — SOC / MDR / MSSP / monitoring
-3. Cybersecurity — Network / firewall / NAC
-4. Cybersecurity — Identity / IAM / MFA / PAM
-5. Cybersecurity — Email security / phishing
-6. Cybersecurity — OT / ICS / SCADA / water
-7. Cybersecurity — GRC / compliance / risk
-8. Cybersecurity — Backup / DR / resilience
-9. Cybersecurity — Offensive / pen testing / vuln management
+1. Cybersecurity: Endpoint / EDR / XDR
+2. Cybersecurity: SOC / MDR / MSSP / monitoring
+3. Cybersecurity: Network / firewall / NAC
+4. Cybersecurity: Identity / IAM / MFA / PAM
+5. Cybersecurity: Email security / phishing
+6. Cybersecurity: OT / ICS / SCADA / water
+7. Cybersecurity: GRC / compliance / risk
+8. Cybersecurity: Backup / DR / resilience
+9. Cybersecurity: Offensive / pen testing / vuln management
 10. DevSecOps / software delivery (e.g. GitLab)
 11. AI / automation / productivity (e.g. Anthropic public sector)
 12. Networking / connectivity / broadband
 13. ERP / financial systems / permitting
 14. GIS / data / asset management
 15. Cross-cutting funding & grant vocabulary
-16. Federal vocabulary (the category is spoken aloud — search it directly)
+16. Federal vocabulary (the category is spoken aloud, so search it directly)
 
 ---
 
-## 1. Cybersecurity — Endpoint / EDR / XDR
+## 1. Cybersecurity: Endpoint / EDR / XDR
 - **Pain terms:** `ransomware`, `malware`, `endpoint`, `data breach`, `device compromise`, `antivirus replacement`, `endpoint protection`, `cybersecurity audit`
 - **Competitors/incumbents:** CrowdStrike, SentinelOne, Microsoft Defender, Sophos, Carbon Black, Cortex
 - **Funding hooks:** `SLCGP`, `cyber insurance`, `cybersecurity grant`, `IT budget`
 - **Fit:** all jurisdiction types; IT Director, CISO, City/County Manager
 
-## 2. Cybersecurity — SOC / MDR / MSSP / monitoring
+## 2. Cybersecurity: SOC / MDR / MSSP / monitoring
 - **Pain terms:** `security operations center`, `managed security`, `MSSP`, `24/7 monitoring`, `incident response`, `threat detection`, `staff augmentation`, `we don't have enough IT staff`, `SIEM`
 - **Competitors/incumbents:** Arctic Wolf, Rapid7, Secureworks, eSentire, CrowdStrike Falcon Complete
 - **Funding hooks:** `SLCGP`, `managed services budget`, `cyber insurance` (insurers increasingly require monitoring)
 - **Fit:** small/mid jurisdictions with thin IT staff; IT Director, City Manager, Finance
 
-## 3. Cybersecurity — Network / firewall / NAC
+## 3. Cybersecurity: Network / firewall / NAC
 - **Pain terms:** `firewall`, `network security`, `network segmentation`, `zero trust`, `VPN`, `remote access`, `network access control`, `IT modernization`
 - **Competitors/incumbents:** Palo Alto, Fortinet, Cisco, Check Point, Juniper/Mist, SonicWall, Aruba/ClearPass
 - **Funding hooks:** `E-Rate` (schools/libraries), `capital improvement`, `IT modernization`, `SLCGP`
 - **Fit:** K-12 (E-Rate), counties, utilities; IT Director, Network Admin, Superintendent/Tech Director
 
-## 4. Cybersecurity — Identity / IAM / MFA / PAM
+## 4. Cybersecurity: Identity / IAM / MFA / PAM
 - **Pain terms:** `multi-factor authentication`, `MFA`, `single sign-on`, `identity`, `password`, `privileged access`, `account compromise`, `phishing`
 - **Competitors/incumbents:** Okta, Microsoft Entra/Azure AD, Duo, Ping, CyberArk, BeyondTrust
 - **Funding hooks:** `cyber insurance` (MFA is a common policy requirement), `SLCGP`
 - **Fit:** all; IT Director, CISO
 
-## 5. Cybersecurity — Email security / phishing
+## 5. Cybersecurity: Email security / phishing
 - **Pain terms:** `phishing`, `business email compromise`, `email security`, `spam`, `wire fraud`, `social engineering`, `security awareness training`
 - **Competitors/incumbents:** Proofpoint, Mimecast, Abnormal, Microsoft Defender for Office, KnowBe4 (training)
 - **Funding hooks:** `cyber insurance`, `SLCGP`
 - **Fit:** all, esp. finance-heavy entities; Finance Director, IT Director
 
-## 6. Cybersecurity — OT / ICS / SCADA / water
+## 6. Cybersecurity: OT / ICS / SCADA / water
 - **Pain terms:** `water system cybersecurity`, `SCADA`, `critical infrastructure`, `operational technology`, `treatment plant`, `utility cybersecurity`, `EPA cybersecurity`
 - **Competitors/incumbents:** Dragos, Claroty, Nozomi, Tenable OT
 - **Funding hooks:** `SLCGP`, `water infrastructure grant`, `state revolving fund`, `EPA`
 - **Fit:** water/wastewater utilities, public works, special districts; Utility Director, Public Works, City Manager
 
-## 7. Cybersecurity — GRC / compliance / risk
+## 7. Cybersecurity: GRC / compliance / risk
 - **Pain terms:** `cybersecurity audit`, `risk assessment`, `compliance`, `CJIS`, `HIPAA`, `policy`, `cybersecurity framework`, `gap assessment`
 - **Competitors/incumbents:** Tenable, Qualys (overlap with vuln), OneTrust, ServiceNow GRC
 - **Funding hooks:** `SLCGP` (requires a cybersecurity plan), `cyber insurance`
 - **Fit:** counties, law enforcement (CJIS), health agencies; CISO, IT Director, County Manager
 
-## 8. Cybersecurity — Backup / DR / resilience
+## 8. Cybersecurity: Backup / DR / resilience
 - **Pain terms:** `disaster recovery`, `backup`, `business continuity`, `ransomware resiliency`, `data recovery`, `downtime`, `continuity of operations`
 - **Competitors/incumbents:** Veeam, Rubrik, Cohesity, Commvault, Datto
 - **Funding hooks:** `SLCGP`, `cyber insurance`, `IT budget`
 - **Fit:** all; IT Director, Emergency Management, City Manager
 
-## 9. Cybersecurity — Offensive / pen testing / vuln management
+## 9. Cybersecurity: Offensive / pen testing / vuln management
 - **Pain terms:** `penetration testing`, `vulnerability assessment`, `vulnerability management`, `cybersecurity audit`, `red team`, `security assessment`
 - **Competitors/incumbents:** Tenable, Qualys, Rapid7, regional pen-test consultancies
 - **Funding hooks:** `SLCGP`, `cyber insurance` (often requires a recent assessment)
@@ -125,7 +125,7 @@ Always run 2–4 pain angles, not one term.
 ---
 
 ## 15. Cross-cutting funding & grant vocabulary
-Add the relevant ones to `funding_terms` — a funding mention near a pain term is a strong
+Add the relevant ones to `funding_terms`. A funding mention near a pain term is a strong
 "money is moving" signal:
 
 - **Cyber-specific:** `SLCGP` (State and Local Cybersecurity Grant Program), `cyber insurance`, `cybersecurity grant`
@@ -136,12 +136,12 @@ Add the relevant ones to `funding_terms` — a funding mention near a pain term 
 
 ---
 
-## 16. Federal vocabulary (the category is spoken aloud — search it directly)
+## 16. Federal vocabulary (the category is spoken aloud, so search it directly)
 
 Cloverleaf indexes federal public meetings (department/agency public sessions,
 congressional hearings, federal advisory committees), not just SLED. Federal speakers
 are sophisticated and **name the product category out loud**, so the "search the pain,
-not the product" rule relaxes here — you can search the category itself.
+not the product" rule relaxes here, so you can search the category itself.
 
 Use this as a `primary_terms_federal` set, layered on top of the vendor's category bank:
 
@@ -152,10 +152,10 @@ Use this as a `primary_terms_federal` set, layered on top of the vendor's catego
 
 **Read the federal signal differently.** A member of Congress or an IG witness saying an
 agency's systems are broken is *oversight pressure*, not a buyer voicing intent. It marks
-an agency that now has a mandate to fix something — work it by identifying the responsible
+an agency that now has a mandate to fix something. Work it by identifying the responsible
 program office / agency CIO off-platform, then approach them. A budget owner speaking in
 an agency working session is the stronger, rarer signal; weight it higher when you find it.
 
 **Buyer roles (federal):** agency CIO, CISO, Chief Data Officer, Chief AI Officer, program
 manager / program office, contracting officer (procurement). The speaker in the meeting is
-often *not* the buyer — trace from the named agency/program to the office that owns it.
+often *not* the buyer, so trace from the named agency/program to the office that owns it.

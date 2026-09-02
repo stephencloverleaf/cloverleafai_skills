@@ -1,149 +1,207 @@
 ---
 name: opportunity-enrichment
 description: >-
-  Take a Cloverleaf signal and build it into a full government opportunity by filling
-  gaps with web search and the Apollo.io MCP — jurisdiction profile, budget/fiscal
-  timing, procurement stage, grants (e.g. SLCGP), and the decision-makers to sell into.
-  Use this whenever the user wants to "flesh out," "research," "build out," "qualify,"
-  or "add context to" a signal or lead, or asks "who do we call / what's their budget /
-  is there an RFP." Step 3 of the demo workflow (search → dashboard → ENRICH → outreach).
-  Focus is the GOVERNMENT buyer side. Outputs fields that drop straight back into the
-  dashboard and feed the outreach skill.
+  Turns one Cloverleaf signal into a workable government opportunity by pulling the full
+  meeting transcript, then filling the gaps with web search and Apollo.io: jurisdiction
+  profile, budget and fiscal timing, procurement stage, grants such as SLCGP, and the
+  decision-makers to sell into. Also verifies the signal before anyone acts on it, since
+  speaker names, timestamps, and jurisdictions in search output are inferences. Trigger
+  phrases: "flesh out this signal", "research this lead", "build out this opportunity",
+  "qualify this", "add context to this signal", "who do we call", "what is their budget",
+  "is there an RFP". Runs after the signal sweep and before signal-outreach, and its output
+  drops straight back onto a signal-dashboard card. Focus is the government buyer side, not
+  the vendor side, which vendor-profile covers.
 ---
 
-# Opportunity Enrichment (government side)
+# Opportunity enrichment (government side)
 
 ## The job
 
-A Cloverleaf signal tells you a jurisdiction has a need and (often) who raised it. To make
-it a real opportunity a rep can work, you fill four gaps:
+A Cloverleaf signal says a jurisdiction has a need and, often, who raised it. To make it an
+opportunity a rep can work, you verify it and then fill four gaps:
 
-1. **Jurisdiction profile** — type (city / county / school district / utility / state agency), population, region, governing form.
-2. **Money & timing** — budget size, IT/cyber budget if findable, **fiscal-year calendar** (when the budget is actually set — this is the clock), and any **grant** (especially **SLCGP**, the State and Local Cybersecurity Grant Program).
-3. **Procurement stage** — pre-RFP discussion → budgeting → RFP imminent → awarded. This sets urgency.
-4. **Decision-makers** — IT Director / CIO / CISO, City or County Manager, Finance Director, procurement officer, and the relevant elected committee. Names, titles, email, phone.
+1. **Jurisdiction profile.** Type (city, county, school district, utility, state or federal
+   agency), population, region, governing form.
+2. **Money and timing.** Budget size, IT or cyber budget when findable, the fiscal-year
+   calendar, which is the clock, and any grant, especially the State and Local
+   Cybersecurity Grant Program (SLCGP).
+3. **Procurement stage.** Pre-RFP discussion, budgeting, RFP imminent, or awarded. This
+   sets urgency, and it decides whether the lead is alive at all.
+4. **Decision-makers.** IT Director, CIO, CISO, City or County Manager, Finance Director,
+   procurement officer, and the relevant elected committee, with names, titles, email, and
+   phone.
 
-The signal already hands you some of this for free (the quote, the speaker, sometimes their
-email/phone). Enrichment fills the rest.
+## Verify before you enrich
 
-## Source order: cheap and reliable first
+Everything in this section has been observed in real Cloverleaf output. Run these checks
+first, because enrichment built on a defective signal looks complete and is wrong.
 
-Spend effort (and Apollo credits) in this order. Stop when the opportunity is workable.
+- **Confirm the jurisdiction from transcript content, not the organization label.** Org
+  metadata can name the wrong place, including the wrong country. A meeting labeled "City
+  of Hobart, Indiana" was Hobart, Tasmania, and it still scored 4/10.
+- **Treat every speaker name as an inference.** `get-meeting-transcripts` returns
+  `person: null` on essentially every line, and `run-meeting-keyword-search` populates a
+  `person` block for the same lines, sometimes confidently wrong. Neither endpoint is
+  authoritative. Confirm a name against published minutes, an official roster, or a
+  signature block before putting it behind a quote.
+- **Read a window, not a quote.** Quotes get spliced across timestamps and truncated right
+  before the speaker disqualifies the claim. Read around the cited offset.
+- **Re-derive timestamps from the transcript.** Deep-link offsets carried over from a search
+  payload have been wrong by 40 to 65 seconds, which opens the link mid-unrelated-sentence.
+- **Pull every session for the date.** The same meeting appears under several IDs, and long
+  hearings split into morning and afternoon records. Check `is_spam`, `user_marked_spam`,
+  `spam_certainty`, and whether `duration_seconds` matches the scheduled length.
+- **Apply the buyer-ownership test.** Do the people speaking own the system that failed, and
+  do they hold budget for this category? Legislators conducting oversight, public
+  commenters, and advocacy witnesses fail this even when the quote is specific and recent.
+  If you cannot name who receives the rep's first email and why they would care, demote the
+  signal to background.
+- **Check the stage before spending effort.** "Took quotes and awarded" or "the board
+  approved" means the lead is gone. Cold outreach needs an open, pre-solicitation signal.
+- **Verify the category fits what the vendor sells.** A well-quoted power-supply failure
+  scores high and is unsellable for a network security vendor.
 
-### 1. Pull the full transcript, then mine it
-This is where `get-meeting-transcripts(meetingId)` belongs in the workflow — not during
-discovery, but here, first, on each of the 3–5 signals that already cleared scoring in
-`cloverleaf-signal-search`. It's free, it's already-available data, and it's the
-highest-signal-per-effort step in enrichment, so it comes before spending a web search or
-an Apollo credit.
+## Source order
 
-The excerpt that came back from discovery (`search-insights`, `run-meeting-keyword-search`,
-or `search-meetings`) is a clipped window. The full transcript often adds a dollar figure
-said a minute later, a second named speaker, or the fuller shape of the timeline that the
-excerpt cut off. The `person.contact` block in the original result may already give you a
-named decision-maker with email and phone — pull that plus whatever the full transcript
-adds (project name, dollar figure, prior incident, timeline like "budget workshop" or
-"audit last year") before searching anything else.
+Spend effort, and paid Apollo credits, in this order. Stop when the opportunity is workable.
 
-### 2. Web search — best for the jurisdiction and the project
-For small and mid-size local governments, the open web beats any contact database, because
-their budgets, agendas, staff directories, and grant awards are public. Run these (adapt the
-jurisdiction name):
+### 1. Pull the full transcript
+
+This is where `get-meeting-transcripts` belongs, on the three to five signals that already
+cleared scoring, not during discovery. It is free and it is the highest-value step, so it
+comes before any web search or Apollo call.
+
+The discovery excerpt is a clipped window. The full transcript often adds a dollar figure
+said a minute later, a second named speaker, or the shape of the timeline the excerpt cut
+off. Pull the project name, dollar figure, prior incident, and timing language such as
+"budget workshop" or "audit last year" before searching anything else.
+
+For the buying group, call `list-contacts` with the signal's `organizationId`. Coverage is
+uneven: incorporated cities and counties are strong, special districts and utilities can
+return nothing. When a roster is empty, say so rather than dropping the org silently. Small
+orgs share inboxes across officials, so dedupe by email and prefer the named-title contact.
+
+For exact parameter names, limits, and response shapes, see `cloverleaf-mcp-operations`.
+
+### 2. Search the web
+
+For small and mid-size local governments the open web beats any contact database, because
+budgets, agendas, staff directories, and grant awards are public. Adapt the jurisdiction
+name and run:
 
 - `"<Jurisdiction>" adopted budget FY2027 cybersecurity OR information technology`
 - `"<Jurisdiction>" CIP OR capital improvement information technology`
 - `"<Jurisdiction>" RFP OR RFQ cybersecurity OR "managed security" OR "penetration testing"`
 - `"<Jurisdiction>" SLCGP OR "cybersecurity grant" award`
 - `"<Jurisdiction>" IT director OR CIO OR "information security" staff directory`
-- `"<Jurisdiction>" ransomware OR data breach` (news — prior incident = urgency)
-- `"<State>" fiscal year start local government` (to time the budget cycle)
+- `"<Jurisdiction>" ransomware OR data breach` (news, since a prior incident means urgency)
+- `"<State>" fiscal year start local government`
 
-Use `web_fetch` on the jurisdiction's `.gov` site for the staff directory, budget PDF, and
-agenda/minutes pages. Pull names, titles, and the budget number from primary sources — do
-not estimate them. If you can't verify a figure, say so and leave it for the rep to confirm.
+Fetch the jurisdiction's own government site for the staff directory, the budget PDF, and
+the agenda pages. Pull names, titles, and budget numbers from primary sources. Never
+estimate a figure. If you cannot verify one, say so and leave it for the rep.
 
-### 3. Apollo.io MCP — best for the vendor side and for confirming named people
-> **ZoomInfo was retired 2026-08-11 and its MCP is disconnected — calls to it return nothing,
-> silently. Apollo.io replaced it. The `enrichment-provider` skill is the authority here and
-> wins if this section is ever reverted by a plugin update.**
+### 3. Use Apollo.io
 
-Apollo's strength is commercial firmographics. Government coverage is **thinner than ZoomInfo's
-was**, and thinner for small jurisdictions than large ones — so on public-sector work the entity's
-own staff directory and adopted budget usually beat it. Use Apollo for the vendor side of the deal,
-for larger agencies and authorities, and to confirm a named person.
+Apollo.io replaced ZoomInfo on 2026-08-11. The ZoomInfo server is disconnected and returns
+nothing rather than failing, so any instruction to call it is stale. Apollo tools are
+deferred in Claude Code: load them with ToolSearch using a `select:` query before calling,
+and use the bare tool names. Every account gets its own Apollo server ID, so never
+hard-code a server prefix. Every Apollo call consumes paid credits.
 
-These tools are deferred in Claude Code — load them with ToolSearch before calling. Use the
-bare tool names below. Every account gets its own Apollo server ID, so never hard-code an
-account-specific MCP server prefix.
+| What you need | Tool |
+|---|---|
+| Company firmographics from a domain | `apollo_organizations_enrich` (bulk: `apollo_organizations_bulk_enrich`) |
+| Find organizations matching criteria | `apollo_mixed_companies_search` |
+| Find people by title, seniority, or org | `apollo_mixed_people_api_search` |
+| Confirm or enrich one known person | `apollo_people_match` (bulk: `apollo_people_bulk_match`) |
+| Search contacts already in the CRM | `apollo_contacts_search` |
+| Hiring as a budget and urgency tell | `apollo_organizations_job_postings` |
 
-- **Find the entity or vendor:** `apollo_mixed_companies_search` by name; or
-  `apollo_organizations_enrich` when you already have the domain.
-- **Get the right people:** `apollo_mixed_people_api_search` on the organization plus titles —
-  "Chief Information Officer", "Chief Information Security Officer", "IT Director",
-  "Information Technology", "Procurement" — and/or seniority filters. Per the territory playbook,
-  run contact searches in **two passes** (one by department/level, one by title keyword);
-  combined filters underperform.
-- **Confirm one known person:** `apollo_people_match` (bulk: `apollo_people_bulk_match`).
-- **Hiring as an urgency tell:** `apollo_organizations_job_postings`. An open security or network
-  role is both a budget signal and a reason to reach out now. This is the nearest replacement for
-  ZoomInfo's scoops/news feed — there is no direct equivalent, so do not promise one.
-- **Check the CRM first:** `apollo_contacts_search` before spending anything new.
+Working notes:
 
-**Honesty rule:** if Apollo has thin coverage for a small jurisdiction, don't force it —
-say "Apollo coverage is thin here; the city directory is the better source" and use the web.
-Never invent a contact, title, or budget to fill the brief.
+- **Government coverage is thinner than ZoomInfo's was**, and thinner for small
+  jurisdictions than large ones. That changes the research order rather than swapping one
+  tool for another: Cloverleaf first, the entity's own web presence second, Apollo third.
+  Use Apollo for larger agencies and authorities and to confirm a named person.
+- Run people searches in two passes, one by department or level and one by title keyword.
+  Combined filters underperform.
+- Check `apollo_contacts_search` before spending anything new.
+- Apollo has no scoops or news feed. `apollo_organizations_job_postings` is the nearest
+  urgency tell. Do not promise an equivalent.
+- Check remaining credits with `apollo_users_api_profile`, not
+  `apollo_usage_stats_credit_usage_stats`, which has reported direct-dial credits as
+  exhausted when thousands remained. Phone reveal is asynchronous: a bulk match with phone
+  reveal returns a request ID, and the numbers arrive from polling
+  `apollo_webhook_result_show`. Email comes back inline.
+- **Honesty rule:** when Apollo coverage is thin for a small jurisdiction, say "Apollo
+  coverage is thin here, the staff directory is the better source" and use the web. A blank
+  field is a fact. A guess is a defect.
 
-## Frame it the way the rep will use it (MEDDPIC)
+### 4. Optional: cross-check the award stage against purchase records
 
-Stephen qualifies on MEDDPIC. Map what you find so the brief is sales-ready, even if partial:
+`search-purchases` (semantic) and `run-purchase-keyword-search` (lexical) read contract and
+purchase records. Use them only to answer "has this already been bought", which sets the
+stage field and can kill a lead.
 
-- **Metrics** — the cost of the pain (downtime, audit findings, ransom exposure).
-- **Economic buyer** — usually the City/County Manager or Council; finance director controls the purse.
-- **Decision criteria / process** — RFP vs. cooperative purchase (e.g. NASPO, Sourcewell), board vote cadence.
-- **Identified pain** — the exact quote from the meeting (you already have it).
-- **Champion** — the official who raised it (often your signal speaker).
-- **Competition** — any incumbent or product named in the meeting (a named competitor = active evaluation).
+Rules for reading a purchase row, verified live 2026-09-02:
 
-Leave a field blank rather than guessing. A partial MEDDPIC with sourced facts beats a complete one full of fiction.
+- **`department` is the buyer.** Never present `organization_names` or `organization_ids`.
+  Every row carries the same 175 ids and 155 names, the entire federal organization list, so
+  those fields are a dataset-level association rather than the awarding body.
+- **Purchase rows carry no `cloverleaf_url`.** Never build one. Cite the award by
+  `source_row_id`, `department`, `vendor_name`, and `transaction_date`.
+- **`amount` can be 0** on a contract modification, so a zero is not evidence of a small buy.
+  `start_date` and `end_date` were null on every sampled row.
+- Scores on a good query ran 0.73 to 0.79, so calibrate these like document hits rather than
+  like transcript hits.
 
-## Output: extend the signal (so it round-trips)
+**Federal caveat:** `purchase_dataset_id` 1 is federal contract awards, with USAspending-style
+award IDs. Coverage beyond federal is unverified as of 2026-09-02, so an absence here says
+nothing about a city or county buy.
 
-Append these fields to the signal object so the dashboard and outreach skills pick them up:
+## Frame it as MEDDPIC
+
+Map what you find so the brief is sales-ready even when partial:
+
+- **Metrics:** the cost of the pain, such as downtime, audit findings, or ransom exposure.
+- **Economic buyer:** usually the City or County Manager or the council. Finance controls
+  the purse.
+- **Decision criteria and process:** RFP versus cooperative purchase (NASPO, Sourcewell),
+  and the board vote cadence.
+- **Identified pain:** the exact quote from the meeting.
+- **Champion:** the official who raised it, often your signal speaker.
+- **Competition:** any incumbent or product named in the meeting, which means an active
+  evaluation.
+
+Leave a field blank rather than guessing.
+
+## Output: extend the signal
+
+Append these fields so the dashboard and outreach skills pick them up:
 
 ```jsonc
 {
-  // …original signal (jurisdiction, quote, speaker, email, phone, terms)…
-  "jurisdiction_profile": { "type": "city", "population": "~107,000", "region": "Spokane County, WA", "fiscal_year": "Jan–Dec" },
-  "money_timing": { "budget_notes": "FY budget workshop held Jun 2026 — funding being set now", "grant": "Check WA SLCGP sub-recipient list" },
+  // original signal fields: jurisdiction, quote, cloverleaf_url, meeting_id, terms
+  "jurisdiction_profile": { "type": "city", "population": "", "region": "", "fiscal_year": "" },
+  "money_timing": { "budget_notes": "", "grant": "" },
   "procurement_stage": "Budgeting / pre-RFP",
   "contacts": [
-    { "name": "Chad Knodel", "title": "IT Manager", "email": "cknodel@spokanevalleywa.gov", "phone": "509-720-5055", "source": "Cloverleaf signal" }
+    { "name": "", "title": "", "email": "", "phone": "", "source": "list-contacts" }
   ],
-  "meddpic": { "identified_pain": "Ransomware resiliency audit found no network pen testing", "champion": "Chad Knodel", "economic_buyer": "City Manager / Council" },
-  "fit": "Active cyber audit cycle with a named gap (pen testing) and budget being set this month.",
-  "next_action": "Email Chad referencing the pen-testing gap; check SLCGP eligibility.",
-  "sources": ["Cloverleaf meeting 18214101", "spokanevalleywa.gov budget page (verify)"]
+  "meddpic": { "identified_pain": "", "champion": "", "economic_buyer": "" },
+  "speaker_confirmed": false,
+  "fit": "one line on why this is a real opportunity",
+  "next_action": "one line on the move",
+  "sources": ["Cloverleaf meeting <id>", "<jurisdiction> budget page"]
 }
 ```
 
 `fit` and `next_action` are one line each and are exactly what the dashboard card and the
-outreach draft need.
-
-## Worked example (continuing the Spokane Valley signal)
-
-**Known from the signal (verified):** City of Spokane Valley, WA, Jun 9 2026 Budget Workshop.
-Chad Knodel (IT Manager, cknodel@spokanevalleywa.gov, 509-720-5055) said last year's
-ransomware resiliency audit "did not include network penetration testing." Erik Lamb
-(Deputy City Manager) framed ransomware as an existential operational risk.
-
-**To verify by web (don't guess these):** population and FY calendar; whether Spokane Valley
-is a WA SLCGP sub-recipient; the City Manager and Finance Director names; any open or planned
-IT/security RFP. Queries: `"Spokane Valley" adopted budget 2026 information technology`,
-`"Spokane Valley" SLCGP cybersecurity grant`, `spokanevalleywa.gov staff directory IT`.
-
-**Read:** budgeting-stage opportunity, named champion, named gap, decision-makers in hand —
-a clean pen-testing / endpoint / MSSP play. Hand to `signal-outreach`.
+outreach draft need. Set `speaker_confirmed` only when you checked the name against minutes,
+a roster, or a signature block.
 
 ## Hand off
-Pass the enriched signal to **`signal-outreach`** to draft the email / LinkedIn / call script,
-and back to **`signal-dashboard`** so the card now shows budget, stage, contacts, and next step.
+
+Pass the enriched signal to `signal-outreach` for the email, LinkedIn note, and call script,
+and back to `signal-dashboard` so the card shows budget, stage, contacts, and next step.

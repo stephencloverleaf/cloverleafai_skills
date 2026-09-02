@@ -1,289 +1,259 @@
 ---
 name: vendor-profile
 description: >-
-  Pre-research a vendor company (and optionally a named contact) from nothing but a
-  name or website, and build a sales-ready VENDOR PROFILE whose main payoff is a
-  ready-to-run Cloverleaf search plan: the pain-point keywords government officials
-  actually say out loud, the named competitors/incumbents worth hunting for
-  displacement deals, the jurisdiction types and buyer roles that fit, and the
-  funding/grant hooks. Use this BEFORE running cloverleaf-signal-search whenever you
-  are handed a new vendor/prospect/company to build pipeline for — e.g. "research
-  GitLab," "build a profile for this company or website," "who would buy this and what
-  do I search," "set me up to prospect for this vendor," or any new logo before the
-  first signal sweep. This is the VENDOR side and the step-0 that makes signal search
-  actually hit. It is distinct from opportunity-enrichment, which researches the
-  GOVERNMENT buyer AFTER a signal is found.
+  Researches a vendor company from nothing but a name or website and produces a
+  sales-ready vendor profile whose payoff is a ready-to-run Cloverleaf search plan: the
+  pain-point keywords government officials say out loud, the anchor terms that cut noise,
+  the competitors worth hunting for displacement deals, the jurisdiction types and buyer
+  roles that fit, the funding hooks, and the own-vendor reject list. Also produces the
+  copy-paste values for the Cloverleaf Account Profile settings page. Run this before
+  cloverleaf-signal-search on any new vendor or prospect. Trigger phrases: "research
+  GitLab", "profile Liquid Networx", "build a profile for this company or website", "who
+  would buy this and what do I search", "what should we search for this vendor", "set me
+  up to prospect for this vendor", or any new logo before the first signal sweep. This is
+  the vendor side. opportunity-enrichment researches the government buyer after a signal
+  is found.
 ---
 
-# Vendor Profile (step 0 — research the company you're prospecting for)
+# Vendor profile
 
 ## Why this skill exists
 
-`cloverleaf-signal-search` only works if you search the **pain, not the product** —
-officials never say "CrowdStrike" or "GitLab" in a council meeting; they say "we got
-hit by ransomware," "our deployments take three weeks," "the audit found gaps." So the
-quality of every signal sweep is capped by how well you've translated *what this vendor
-sells* into *the language a government official would use to describe the problem it
-solves.*
+`cloverleaf-signal-search` only works if you search the pain, not the product. Officials
+never say "CrowdStrike" or "GitLab" in a council meeting. They say "we got hit by
+ransomware", "our deployments take three weeks", "the audit found gaps". The quality of
+every sweep is capped by how well you translate what this vendor sells into the language
+an official uses to describe the problem it solves.
 
-**Coverage note (don't treat Cloverleaf as SLED-only).** Cloverleaf indexes *any
-publicly available public-sector meeting* — federal departments and agencies,
-congressional and advisory committees, states, counties, cities, school boards, and
-special districts. The "pain, not product" rule above holds for local meetings, but it
-**relaxes at the federal level**: agency witnesses and committee members routinely say
-the product category out loud ("DevSecOps," "software factory," "continuous ATO," "zero
-trust"), so for federally-oriented vendors you can often search the category name
-directly. The federal signal also reads differently — it is frequently *oversight
-pressure* (a member of Congress saying an agency's systems are broken) rather than a
-budget owner voicing intent. That still points you at an agency under pressure; you then
-find the actual program office / CIO off-platform.
+That translation is the job. The most valuable output is the Cloverleaf search plan at
+the end. Everything else exists to make that plan correct.
 
-That translation is the job. A vendor profile is not a marketing summary — it is the
-**input that makes the search hit.** The single most valuable thing this skill produces
-is the **Cloverleaf search plan** at the end: term arrays, competitor terms, fit
-filters, and funding hooks that drop straight into `run-meeting-keyword-search` /
-`search-meetings`.
+Two rules govern the plan before you write a single term:
 
-Everything else in the profile (what they sell, ICP, contact context) exists to make
-that search plan correct and to give Stephen account context.
+- **Never put the vendor's own name in a discovery query.** Searching the vendor's name
+  returns footprint mentions: their name in a payment register, an approved-vendor list, or
+  a signed agreement. Those are existing business, not opportunities. The vendor's name
+  belongs only in the `own_vendor_names` reject list.
+- **Cloverleaf covers federal too.** It indexes any publicly available public-sector
+  meeting: federal departments and agencies, congressional and advisory committees, states,
+  counties, cities, school boards, and special districts. Never write that federal is
+  uncovered. State and local carry more depth because those bodies argue things out in open
+  session repeatedly. The pain-not-product rule also relaxes at the federal level, where
+  witnesses say the category aloud ("DevSecOps", "zero trust", "continuous ATO"), so a
+  federal term set can name the category directly.
 
 ## Inputs
 
-- **Required:** a vendor company name **or** website URL. That's enough to start.
-- **Optional:** a named contact (person at the vendor) — if given, add the contact
-  block. If not given, skip it; do not invent one.
-- **Optional:** a territory. If Stephen names one (e.g. "TX only"), put it in the search
-  plan's `states`. If he doesn't, leave `states` open — his default territory is the
-  **entire U.S.**, and he narrows to a rep's territory only situationally. Don't assume
-  Texas.
+- **Required:** a vendor company name or website URL.
+- **Optional:** a named contact at the vendor. Add the contact block if one is given. Never
+  invent one.
+- **Optional:** a territory. Put it in the plan's `states`. With no territory named, leave
+  `states` empty, which means nationwide.
 
-## Research workflow — cheap, authoritative sources first
+If no company name or URL is given, ask for one before proceeding.
 
-Spend effort in this order. Stop when the search plan is solid; you do not need a
-dossier, you need correct search terms.
+## Research workflow
 
-### 1. The vendor's own website (authoritative for *what they sell*)
-`web_fetch` the homepage, the product/solutions pages, and any "public sector,"
-"government," "SLED," or "industries" page. Pull, in **plain language** (strip the
-marketing):
-- What category/categories they actually play in (e.g. "EDR/endpoint," "DevSecOps
-  platform," "MDR/SOC-as-a-service," "GIS," "AI assistant for government").
-- The concrete problems they claim to solve and the outcomes they sell on.
-- Named **customers/case studies**, especially any government/SLED logos — these tell
-  you which jurisdiction types already buy this.
-- Any **compliance/authorization** posture relevant to gov buyers: FedRAMP (and level),
-  StateRAMP, CJIS, FIPS, SOC 2, IL4/IL5. These are both credibility and search hooks.
+Spend effort in this order and stop when the search plan is solid. You need correct search
+terms, not a dossier.
 
-### 2. Web search (competitors, news, gov footprint, triggers)
-Run a few angles (adapt the name):
-- `"<Vendor>" competitors OR alternatives` and `"<Vendor>" vs` — to build the
-  **competitor/incumbent list** (you'll search these names too; a competitor named in a
-  meeting = an active evaluation = a displacement opening).
-- `"<Vendor>" government OR "public sector" OR SLED customers` — real gov footprint.
-- `"<Vendor>" FedRAMP OR StateRAMP OR CJIS` — authorization status from primary sources.
-- `"<Vendor>" cooperative contract OR NASPO OR Sourcewell OR GSA OR "state contract"` —
-  how a government can actually buy them (lowers procurement friction = stronger plays).
-- `"<Vendor>" funding OR acquisition OR layoffs OR breach` (news) — recent triggers that
-  shape urgency or talk track.
+### 1. Read the vendor's own website
 
-Prefer the vendor's `.gov`-facing pages, the FedRAMP marketplace, and primary news over
-aggregators. **If you can't verify something, say so** — an unverified FedRAMP claim is
-worse than "not found; verify on marketplace.fedramp.gov."
+Fetch the homepage, the product or solutions pages, and any public sector, government,
+SLED, or industries page. Pull the following in plain language, with the marketing
+stripped:
 
-### 3. Contact + firmographics via MCP (only if useful)
-The Apollo.io connector is for **firmographics and the named contact**, not the product
-research above. (Apollo.io replaced ZoomInfo on 2026-08-11; the `enrichment-provider`
-skill carries the full tool mapping.)
-- If a contact name was given: `apollo_people_match` to confirm role, seniority, and what
-  they own (federal vs SLED, product line). This shapes the talk track, not the search terms.
-- For company size, HQ, or employee count, a quick `apollo_organizations_enrich` on the
-  domain is fine. Don't burn credits enriching things you don't need for the profile.
-- **Note the boundary:** Apollo here describes the *vendor*, where its commercial
-  firmographics are strongest. The same tools get used again later by
-  `opportunity-enrichment` to describe the *government buyer* once a signal is found, where
-  coverage is thinner. Don't confuse the two passes.
+- The category or categories they play in, and the primary industry in two to five words.
+- The concrete problems they solve and the outcomes they sell on.
+- Five to eight named products or services.
+- Named customers and case studies, especially government logos, which tell you which
+  jurisdiction types already buy this.
+- Compliance posture that matters to government buyers: FedRAMP and its level, StateRAMP,
+  CJIS, FIPS, SOC 2, IL4 or IL5.
 
-## The translation layer (the core deliverable)
+### 2. Search the web
 
-Convert what the vendor sells into the four things the search plan needs. For the
-category-by-category term banks, named competitors, and grant hooks, read
-**`references/term-banks.md`** — it covers cyber sub-domains plus non-cyber categories
-(DevSecOps, AI/automation, networking, ERP/GIS) so this works for GitLab and Anthropic,
-not just security vendors.
+Run a few angles, adapting the name:
 
-The method (apply it even for a category not in the reference file):
+- `"<Vendor>" competitors OR alternatives` and `"<Vendor>" vs`, to build the competitor
+  list. A competitor named in a meeting means an active evaluation and a displacement
+  opening.
+- `"<Vendor>" government OR "public sector" OR SLED customers`, for real footprint.
+- `"<Vendor>" FedRAMP OR StateRAMP OR CJIS`, for authorization status from primary sources.
+- `"<Vendor>" cooperative contract OR NASPO OR Sourcewell OR GSA OR "state contract"`, for
+  how a government can actually buy them. Low procurement friction makes a stronger play.
+- `"<Vendor>" funding OR acquisition OR layoffs OR breach`, for recent triggers.
 
-1. **Pain terms** — what does an official *say* when they have this problem? Write the
-   incident, the project, and the budget-line phrasings. "Endpoint protection" → officials
-   say `ransomware`, `data breach`, `endpoint`, `device compromise`, `cybersecurity audit`.
-   "DevSecOps platform" → `software development`, `application modernization`, `legacy
-   system`, `IT modernization`, `developer`, `agile`. Always include 2–4 angles, not one
-   perfect term. **Federal exception:** at the federal level the category vocabulary is
-   spoken aloud, so add the product/category terms themselves (`DevSecOps`, `software
-   factory`, `continuous ATO`, `zero trust`) to the federal term set — see the Federal
-   vocabulary section of `references/term-banks.md`.
-2. **Competitor terms** — the incumbents/products an official might name mid-evaluation.
-   These are separate search runs (displacement plays), flagged as such.
-3. **Funding/trigger terms** — the grant or budget language that signals money is moving:
-   `SLCGP`, `cyber insurance`, `IT budget`, `cybersecurity grant`, `ARPA`, `bond`,
-   `capital improvement`. Map to the vendor's category.
-4. **Own-vendor names** — the exact strings that mean "this vendor is already in the
-   room," not a discovery. Include the legal/brand name and any product name officials
-   might say instead, if it differs from the company name (e.g., a platform name distinct
-   from the corporate parent). This list feeds `cloverleaf-signal-search`'s Guardrail 0
-   directly: any transcript or insight naming us as already contacted, demoed, or quoted
-   gets auto-rejected before scoring, full stop — a live deal in our own pipeline is not
-   a pre-RFP signal, no matter how good the budget or timing looks.
+Prefer the vendor's government-facing pages, the FedRAMP marketplace, and primary news over
+aggregators. If you cannot verify something, say so. An unverified FedRAMP claim is worse
+than "not found, verify on the FedRAMP marketplace".
 
-If the vendor spans multiple categories, produce a small term set per category rather
-than one bloated query — broad/common terms over long windows blow past Cloverleaf's
-context limit and the result gets dumped to a file.
+### 3. Use Apollo.io for firmographics and the named contact only
 
-## Output: the profile (use this exact structure)
+Apollo.io replaced ZoomInfo on 2026-08-11. The ZoomInfo server is disconnected and returns
+nothing rather than failing, so any instruction to call it is stale. Apollo tools are
+deferred in Claude Code: load them with ToolSearch using a `select:` query before calling,
+and use the bare tool names. Every account gets its own Apollo server ID, so never
+hard-code a server prefix.
 
-Lead with substance, no warm-up. Markdown, with a fenced search-plan block at the end so
-it round-trips into the next skill.
+- `apollo_organizations_enrich` on the domain, for size, headquarters, and employee count.
+- `apollo_mixed_companies_search` by name, when you do not have the domain.
+- `apollo_people_match`, only when a contact name was given, to confirm role, seniority,
+  and what the person owns. That shapes the talk track, not the search terms.
+
+Apollo calls consume paid credits, so pull only what the profile needs. Apollo's strength
+is commercial firmographics, which is what the vendor side of a profile needs. Its
+government coverage is thinner, so do not reuse this pass for the buyer side.
+`opportunity-enrichment` handles the buyer side and carries the coverage caveats. To check
+remaining credits, read `apollo_users_api_profile`, not the usage-stats tool, which
+misreports direct-dial credits as exhausted.
+
+## The translation layer
+
+Convert what the vendor sells into the five things the plan needs. For category term banks,
+named competitors, funding hooks, and the federal vocabulary set, read
+**`references/term-banks.md`**. It covers cyber sub-domains plus DevSecOps, AI, networking,
+ERP, and GIS. Read it whenever the vendor fits one of those categories, or as a model for
+writing a category it does not cover.
+
+1. **Pain terms.** What an official says when they have this problem. Write the incident,
+   the project, and the budget-line phrasings. "Endpoint protection" becomes `ransomware`,
+   `data breach`, `endpoint`, `cybersecurity audit`. Give two to four angles, not one
+   perfect term.
+2. **Anchor terms.** A confirming word that must appear near the pain term, which is what
+   `mustIncludeTerms` plus `proximity` enforce. Anchoring `firewall` to `outdated`,
+   `replacement`, `renewal`, or `upgrade` keeps out the building firewalls that zoning
+   boards discuss. Anchor only with unambiguous words.
+3. **Competitor terms.** The incumbents or products an official might name mid-evaluation.
+   These run as a separate displacement pass, never mixed into the pain query.
+4. **Funding terms.** Grant or budget language that means money is moving: `SLCGP`, cyber
+   insurance, IT budget, E-Rate, ARPA, bond, capital improvement.
+5. **Own-vendor names.** Every string an official might say for us: the company name and
+   any product or brand name that differs from it. This is a reject list, not a search list.
+
+If the vendor spans several categories, produce a small term set per category rather than
+one bloated query.
+
+## Output 1: the profile
+
+Lead with substance. Markdown, with a fenced search-plan block at the end so it round-trips
+into the next skill.
 
 ```markdown
-# Vendor Profile — <Company>
+# Vendor profile: <Company>
+
+## Primary industry
+<two to five words, lowercase>
 
 ## What they sell (plain)
-<2–4 sentences: category(ies), the problem they solve, how a gov buyer would describe the need>
+<two to four sentences: category, the problem they solve, how a government buyer would
+describe the need>
 
 ## Cloverleaf fit read
-**<strong / medium / weak>** — <one line, stated up front before anyone burns sweeps:
-is Cloverleaf the right channel for this vendor, and which level carries the signal
-(federal / state / local / higher-ed)? E.g. "Strong, federal-led: agencies say the
-category aloud in hearings; thinner at the local level where few entities write software.">
+**<strong / medium / weak>**: <one line, stated before anyone burns a sweep. Is Cloverleaf
+the right channel for this vendor, and which level carries the signal: federal, state,
+local, or higher education?>
 
-## Who buys it (ICP)
-- **Jurisdiction types:** <federal dept/agency / congressional or advisory committee / state / county / city / K-12 / higher-ed / water-utility / special district>
-- **Buyer roles (own the budget):** <agency CIO/CISO / program office / IT Director / CIO / CISO / City-County Manager / Finance / Superintendent / procurement>
-- **Gov footprint / proof:** <named customers if found (note federal vs SLED), else "none verified">
+## Key products and services
+<five to eight concrete offerings>
+
+## Who buys it
+- **Jurisdiction types:** <federal agency, congressional or advisory committee, state,
+  county, city, K-12, higher education, utility, special district>
+- **Buyer roles that own the budget:** <agency CIO or CISO, program office, IT Director,
+  CIO, CISO, City or County Manager, Finance, Superintendent, procurement>
+- **Government footprint:** <named customers if found, noting federal versus SLED, else
+  "none verified">
 
 ## Buyability
-- **Authorizations:** <FedRAMP level / StateRAMP / CJIS / IL4-5 / none found — cite source or mark unverified>
-- **Contract vehicles:** <Carahsoft/aggregator / NASPO / Sourcewell / GSA / state contract — or "none found">
-- **Procurement friction read:** <low / medium / high, one line why>
+- **Authorizations:** <FedRAMP level, StateRAMP, CJIS, IL4 or IL5, or "none found". Cite
+  the source or mark it unverified.>
+- **Contract vehicles:** <aggregator, NASPO, Sourcewell, GSA, state contract, or "none
+  found">
+- **Procurement friction:** <low, medium, or high, and one line on why>
 
-## Competitors / incumbents to hunt
-<list — these become displacement search runs>
+## Competitors and incumbents to hunt
+<list. These become displacement search runs.>
+
+## Pain points, in the official's language
+<the incidents and problems an official voices, not the vendor's outcome marketing>
 
 ## Triggers (recent)
-<funding, breach, acquisition, leadership change — or "none notable found">
+<funding, breach, acquisition, leadership change, or "none notable found">
 
 ## Contact (only if one was given)
-- <name, title, what they own, email/phone if verified, source>
+<name, title, what they own, verified email or phone, source>
 
-## Cloverleaf search plan  ← the payoff
+## Cloverleaf search plan
 ```jsonc
 {
-  "primary_terms_sled": ["<pain term>", "<pain term>", "<project term>"],   // local: search the PAIN
-  "primary_terms_federal": ["<category term>", "<pain term>"],              // federal: category spoken aloud, search it directly (omit if vendor isn't federal-relevant)
-  "competitor_terms": ["<incumbent/product>", "..."],                      // separate displacement run
-  "own_vendor_names": ["<Company>", "<product/brand name if different>"],  // reject list — feeds signal-search Guardrail 0, never mixed into a search query
-  "funding_terms": ["SLCGP", "cyber insurance", "IT budget"],              // optional precision angle
-  "states": [],                          // empty = full U.S. (Stephen's default); fill only if territory named
-  "days_back": 90,                       // 30–90; never omit (no date silently = last 7 days only)
-  "fit_filters": {                       // how to SCORE hits for this vendor
-    "jurisdiction_types": ["federal agency", "state", "county", "city", "higher-ed"],
-    "buyer_roles": ["agency CIO/CISO", "IT Director", "CISO", "City Manager"]
+  "primary_terms_sled": ["<pain term>", "<pain term>", "<project term>"],
+  "primary_terms_federal": ["<category term>", "<pain term>"],
+  "anchored_terms": [
+    { "primary": "firewall", "anchor": ["outdated", "replacement", "renewal", "upgrade"] }
+  ],
+  "competitor_terms": ["<incumbent or product>"],
+  "own_vendor_names": ["<Company>", "<product or brand name if different>"],
+  "funding_terms": ["SLCGP", "cyber insurance", "IT budget"],
+  "states": [],
+  "days_back": 90,
+  "fit_filters": {
+    "jurisdiction_types": ["federal agency", "state", "county", "city", "higher education"],
+    "buyer_roles": ["agency CIO or CISO", "IT Director", "CISO", "City Manager"]
   },
-  "notes": "Run primary first; if thin, widen days_back. Run competitor_terms as a 2nd pass. run-meeting-keyword-search caps at 25 results."
+  "notes": "Run primary terms first. If thin, widen the date window. Run competitor terms as a second pass."
 }
 ```
 ```
 
-### Rules the search plan must respect (verified Cloverleaf behavior)
-- `days_back` 30–90. **Never omit a date** — with no date the tools only look back 7 days.
-- `states` empty = nationwide (Stephen's default). Only fill it if a territory was named.
-- Keep terms **specific** ("ransomware resiliency," "security operations center") over
-  generic ("technology," "security") — generic + wide window overflows context.
-- Competitor terms are a **separate run**, not mixed into the pain query.
-- `own_vendor_names` must cover every string an official might actually say for us — the
-  company name and the product/brand name both, whenever they differ. This is a reject
-  list, not a search list: never pass it as `terms` to a search tool.
-- `run-meeting-keyword-search` returns at most **25 results, no pagination** — so precise
-  terms beat broad ones. Use `mustIncludeTerms`/`proximity` if a query is too noisy.
-- **Higher-ed-heavy vendors:** universities rarely surface in broad keyword sweeps the way
-  city councils do. For these, name the target institutions and walk their meetings with
-  `lookup-organization` → `list-organization-meetings` (board of regents / trustees, IT
-  governance) instead of relying on a nationwide keyword sweep.
+### Rules the search plan must respect
 
-## Honesty rules (non-negotiable)
+- **Never omit a date window.** With no date, the meeting and document tools look back only
+  seven days. Use a `daysBack` of 30 to 90, or `startDate` and `endDate`, which cannot be
+  combined with `daysBack`.
+- `states` empty means nationwide. Fill it only when a territory was named. It works on
+  every search tool and accepts two-letter codes, full names, and Canadian provinces.
+- Keep terms specific. "ransomware resiliency" and "security operations center" beat
+  "technology" and "security". Broad terms over a wide window overflow the context limit
+  and the result gets written to a file.
+- Search one vendor name per query. In a batched `terms` array, one high-frequency term
+  consumes the ranking and every other name reports zero for the returned page only, which
+  is not a corpus count.
+- Spell multi-word vendor names the way speech-to-text renders them, not the way the
+  company brands itself. Spaced `Clifton Larson Allen` returns hundreds of meetings where
+  `CliftonLarsonAllen` returns none. Watch for ordinary English words that are also product
+  names, which return near-total noise on their own.
+- Before claiming a competitor returns zero, re-run it alone, in spaced and phonetic
+  variants, and across both the meeting and the document layers. A wrong zero looks exactly
+  like a right one.
+- Pagination is real. `perPage` goes up to 100 with `page`, and `search-insights` uses
+  `limit` up to 200. The old 25-meeting cap is gone.
+- `own_vendor_names` is never passed as `terms` to a search tool.
+- **Higher-education-heavy vendors:** universities rarely surface in broad keyword sweeps.
+  Name the target institutions and walk their meetings with `lookup-organization` and then
+  `list-organization-meetings` (board of regents or trustees, IT governance) instead.
+
+For parameter names, limits, and response shapes, see `cloverleaf-mcp-operations`.
+
+## Output 2: Cloverleaf Account Profile fields
+
+Produce a second block with the values that paste into the platform's Account Profile
+settings page. The field list, the repeater behavior, and the boilerplate Focus Area text
+are in **`references/account-profile-fields.md`**. Read it when you are ready to write this
+block.
+
+## Honesty rules
+
 - Never fabricate a FedRAMP status, customer logo, competitor, contract vehicle, contact,
-  or metric to fill the template. Mark unknowns "not found / verify."
-- Distinguish what the vendor *claims* (their site) from what's *independently verified*
-  (third-party, marketplace, news).
-- If a section has nothing real, leave it short and say so. A thin profile with sourced
-  facts beats a full one with fiction — and a wrong search term wastes a real sweep.
-
-## Output 2 — Cloverleaf Account Profile fields (copy/paste into the platform)
-
-Beyond the profile doc above, Stephen needs values that paste directly into Cloverleaf's
-own **Account → Profile** settings page. That's a real form, not a report: Job title,
-Industry, Focus Area, Competitor, Products/Services You Offer, and Pain Points Your
-Product Solves — where Focus Area, Competitor, Products/Services, and Pain Points are each
-**repeaters** (a `+` button adds another box). So this block gives **one short, literal
-value per line, numbered**, ready to paste into consecutive boxes — no paragraphs, except
-where the field itself expects a directive (Focus Area).
-
-Always produce this as a second, separate block after the main profile doc.
-
-```markdown
-## Cloverleaf Account Profile — copy/paste fields
-
-**Job title:**
-<role> - <Vendor>
-<!-- e.g. "Account Executive - Threefold AI." Placeholder seller persona — swap in
-     Stephen's real title if this account represents him rather than a rep at the vendor. -->
-
-**Industry:**
-<2–5 words, lowercase, terse — mirror the platform's own style ("cybersecurity"), not a sentence>
-
-**Focus Area** (one box each)
-1. Identify the top 3 opportunities for <category>. Score them 1 through 10 for how relevant they are.
-2. In the 3 opportunities, summarize who spoke, their role, the main quote that proves there is an opportunity with a timestamp, what the suggested next step is, and how far along in the opportunity it is (awareness, initial research, seeking funding, going to RFP, vendor chosen).
-
-**Competitor** (one box each — identical to, or a subset of, "Competitors / incumbents to hunt" above; don't create a second, divergent list)
-1. <competitor 1>
-2. <competitor 2>
-3. <competitor 3>
-
-**Products/Services You Offer** (one box each — concrete noun phrases, matching the
-platform's own terseness: "firewalls," "wireless access points," not "we sell firewalls
-to protect networks")
-1. <product/service>
-2. <product/service>
-(5–8 items)
-
-**Pain Points Your Product Solves** (one box each — the official's language, the same
-"pain, not product" translation used in the search plan, not the vendor's outcome-marketing copy)
-1. <pain point>
-2. <pain point>
-(as many as genuinely verified — no padding to hit a round number)
-```
-
-### Rules for this block
-- **Focus Area 2 is boilerplate.** Reuse it verbatim across every vendor profile. Only
-  Focus Area 1 changes per vendor — just the category name gets swapped in. Add a third
-  Focus Area only if Stephen wants an extra cut (e.g., federal vs. SLED, or a named
-  territory) — don't invent one by default.
-- **Industry is a label, not a sentence.** Match the terseness of the platform's own
-  example — a couple of words, lowercase.
-- **Job title is a placeholder persona**, not a researched fact — flag it as such so
-  Stephen knows to swap in his own title if he's the one logging in as himself.
-- **Products/Services and Pain Points follow the same honesty rule as the rest of the
-  profile** — no invented line items to fill boxes. A short list beats a padded one.
-- **Competitor list here must match** the "Competitors / incumbents to hunt" list in the
-  main profile doc — reuse it, don't re-derive a different one.
+  or metric to fill the template. Mark unknowns "not found, verify".
+- Separate what the vendor claims on its own site from what a third party verifies.
+- Leave a thin section thin and say so. A wrong search term wastes a real sweep.
+- Never print "45,000+ agencies". The Cloverleaf AI website says 70,000+ agencies monitored
+  continuously. Verify any platform figure before using it.
 
 ## Hand off
-Pass the **Cloverleaf search plan** to `cloverleaf-signal-search` (it maps directly onto
-`terms` / `states` / `daysBack`). Run the primary terms first, then the competitor terms
-as a displacement pass. `own_vendor_names` travels with it and feeds that skill's
-Guardrail 0 automatically. The signal-search skill also handles document/procurement
-searches and recurring territory sweeps — all three guardrails (own-vendor, stage filter,
-minimum specificity) apply to every signal from every source.
-From there the normal workflow continues: `signal-dashboard` ->
-`opportunity-enrichment` (government side) -> `signal-outreach`.
+
+Pass the search plan to `cloverleaf-signal-search`. It maps onto `terms`, `states`, and the
+date window, and `own_vendor_names` feeds that skill's own-vendor guardrail. Run the primary
+terms first, then the competitor terms as a displacement pass. From there the workflow
+continues to `signal-dashboard`, `opportunity-enrichment`, and `signal-outreach`.

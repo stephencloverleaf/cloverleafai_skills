@@ -1,52 +1,46 @@
 ---
 name: police-chief-transitions
 description: >-
-  Find newly appointed or incoming police chiefs in Cloverleaf government-meeting
-  data and check them against the user's Salesforce contacts to surface people
-  they already know who are changing jobs, plus warm paths into the agencies
-  involved. Use this whenever the user wants to spot police-chief transitions,
-  new/incoming/interim chiefs, leadership changes in law enforcement, or "people
-  I know who are moving into new roles" as a prospecting signal — even if they
-  don't name Cloverleaf or Salesforce explicitly. Trigger on phrases like "any
-  new police chiefs", "who's starting a new chief role", "check for chief
-  transitions in [states]", "are any of my contacts becoming chiefs", or "run
-  the chief signal".
+  Finds newly appointed, incoming, or interim police chiefs in Cloverleaf government-meeting
+  data, then, when a CRM connector is attached, checks them against the user's contacts to
+  surface people they already know who are changing jobs plus warm paths into the agencies
+  involved. Read-only: it reports and never writes to a CRM. Trigger phrases: "any new
+  police chiefs", "who is starting a new chief role", "check for chief transitions in
+  <states>", "are any of my contacts becoming chiefs", "run the chief signal", or any ask
+  about law-enforcement leadership changes as a prospecting signal, even without naming
+  Cloverleaf or a CRM.
 ---
 
-# Police Chief Transition Signals
+# Police chief transition signals
 
-## What this does and why it matters
+## What this does
 
-The job is to answer: **which people the user already knows are moving into new
-police-chief roles — and which agencies with a new chief are ones the user already
-has a foot in?** A contact changing jobs (or a new chief at an agency where the user
-knows someone) is a warm prospecting signal.
+It answers two questions: which people the user already knows are moving into new
+police-chief roles, and which agencies with a new chief are ones the user already has a foot
+in. A contact changing jobs, or a new chief at an agency where the user knows someone, is a
+warm prospecting signal.
 
-Two-sided flow:
-1. **Cloverleaf** surfaces new/incoming/interim chief mentions in public government
-   meetings.
-2. **Salesforce** tells us whether each chief — or their new agency — connects to a
-   known contact.
+Cloverleaf surfaces the transition. A CRM tells you whether the chief or the new agency
+connects to a known contact. The CRM half is optional: without one, deliver the transition
+list with warm-path suggestions.
 
-This skill is **read-only**: it reports findings and never writes to Salesforce.
+## Gather first
 
-## Inputs to gather first
-
-- **Geographies.** State level for now (Cloverleaf's meeting search filters natively by
-  state). Ask which states/provinces if the user hasn't said; accept 2-letter codes or
-  full names. (City/county/agency-level targeting is a planned future iteration — don't
-  promise it.)
-- **Time window.** Default to the **last 14 days**. Mention the default when asking about
+- **Geographies.** State level. Cloverleaf search filters natively by state and accepts
+  two-letter codes or full names. Ask which states if the user has not said. City, county,
+  and agency-level targeting is a future iteration; do not promise it.
+- **Time window.** Default to the last 14 days. Mention the default when you ask about
   geography so the user can override it in the same reply.
 
-If the user already gave states and/or a window, don't re-ask — just confirm as you go.
+If the user already gave states or a window, do not re-ask.
 
-## Step 1 — Find new-chief mentions in Cloverleaf
+## Step 1: find new-chief mentions
 
-Use `Cloverleaf AI:run-meeting-keyword-search` scoped to the requested `states` and window
-(`daysBack: 14` by default, or `startDate`/`endDate` for a range).
+Use `run-meeting-keyword-search` scoped to the requested `states` and window. Pass `daysBack`
+of 14, or `startDate` and `endDate` for a range. The two cannot be combined. Never omit the
+window: with no date the tool looks back seven days.
 
-Starting terms (tune by result volume):
+Starting terms, tuned by result volume:
 
 ```
 "new police chief", "police chief appointed", "police chief sworn in",
@@ -54,133 +48,149 @@ Starting terms (tune by result volume):
 "chief of police appointed", "named police chief"
 ```
 
-Recall matters more than precision — Step 2 filters noise:
-- Too few results → broaden to `"police chief"` / `"chief of police"` and lean on Step 2,
-  or widen the window.
-- Too many → tighten with `mustIncludeTerms: ["chief"]` and consider `proximity`.
-- De-duplicate by person; one chief may appear in several meetings.
+Recall matters more than precision, because Step 2 filters the noise.
 
-## Step 2 — Extract the chief's details
+- Too few results: broaden to "police chief" or "chief of police" and lean on Step 2, or
+  widen the window.
+- Too many: tighten with `mustIncludeTerms` of `["chief"]` and a `proximity` of about 50.
+- `perPage` goes up to 100 with `page`, so paginate rather than accepting the first page as
+  the whole answer.
+- De-duplicate by person. One chief appears in several meetings. Also de-duplicate meetings
+  on organization, title, and date, because the same meeting is ingested under more than one
+  ID.
 
-Names usually live in the transcript, not the search hit. Pull context and extract, per
-candidate: **name** (note partial/first-only/truncated names explicitly), **jurisdiction
-+ state** (from the meeting's organization), **status** (started vs. starting soon), and a
-**meeting reference** (date + link).
+For parameters, limits, and response shapes, see `cloverleaf-mcp-operations`.
+
+## Step 2: extract the chief's details
+
+Names usually live in the transcript, not the search hit. Per candidate, extract the name,
+the jurisdiction and state from the meeting's organization, the status (started or starting
+soon), and the meeting reference: date plus the `cloverleaf_url` from the payload. Never
+build a link yourself.
 
 Name-recovery rules learned the hard way:
-- To enrich a name, use the **state-scoped** `run-meeting-keyword-search` or pull the
-  **specific meeting's** transcript via `get-meeting-transcripts`. **Do NOT run an
-  unscoped `search-meetings` for name recovery** — without `states` it floods with
-  nationwide noise (unrelated people, even movie transcripts).
-- Transcripts garble names. Expect first-only ("Ron"), surname-only ("Davila"), and
-  truncated ("Gerald L.") forms. Surface the chief anyway; don't discard for a missing
-  name — flag what's missing and let scoring handle the uncertainty.
-- **Disambiguate police vs. fire/other chiefs.** "Chief [X]" hits include fire chiefs and
-  assistant chiefs; require police/PD context before treating someone as a police chief.
 
-Drop hits that aren't real transitions (a chief merely speaking, a budget line, a
-nameless "we'll soon hire a chief"). Keep nameless-but-real transitions in a **separate
-bucket** (Step 5) rather than mixing them into the matchable list.
+- To recover a name, use the state-scoped `run-meeting-keyword-search` or pull the specific
+  meeting with `get-meeting-transcripts`. **Do not run an unscoped `search-meetings` for name
+  recovery.** Without `states` it floods with nationwide noise.
+- **Treat every name as unconfirmed until you check it.** `get-meeting-transcripts` returns
+  no speaker on essentially every line, and `run-meeting-keyword-search` populates a person
+  block that is sometimes confidently wrong. Confirm against minutes, an official roster, or
+  a press release before presenting a name as fact.
+- Speech-to-text garbles names. Expect first-only ("Ron"), surname-only ("Davila"), and
+  truncated ("Gerald L.") forms. Surface the chief anyway. Flag what is missing and let
+  scoring carry the uncertainty.
+- **Separate police chiefs from fire and assistant chiefs.** "Chief <X>" hits include fire
+  chiefs. Require police or PD context before treating someone as a police chief.
+- Confirm the jurisdiction from transcript content, not the organization label, which can
+  name the wrong place.
 
-## Step 3 — Cross-reference Salesforce
+Drop hits that are not real transitions: a sitting chief merely speaking, a budget line, a
+nameless "we will hire a chief soon". Keep nameless-but-real transitions in a separate bucket
+for Step 5 rather than mixing them into the matchable list.
 
-Resolve the org first: call `salesforce:get_username`. If no default target org resolves,
-call it with `defaultTargetOrg: false` and `defaultDevHub: false` to use the allow-listed
-org. **Tell the user which org/alias you're querying and why** (the connector requires
-this). Never guess a username/alias. Pass the resolved `usernameOrAlias` and a working
-`directory` to `run_soql_query`.
+## Step 3: cross-reference the CRM, if one is attached
 
-For each chief, look for **two kinds of signal** — both feed the score:
+**This step is conditional.** Run it only when a Salesforce or other CRM connector is
+attached to the session. Without one, skip to Step 5 and deliver the transition list with
+warm-path suggestions: for each agency, name the roles a rep should approach and why the
+transition opens the door.
 
-**(a) Person-level match** — a contact whose name plausibly matches the chief. This is the
-primary goal: the contact may *be* the person taking the new role.
+With Salesforce attached, resolve the org first by calling `get_username`. If no default
+target org resolves, call it again with the default-target-org and default-dev-hub flags set
+to false to use the allow-listed org. **Tell the user which org or alias you are querying and
+why**, which the connector requires. Never guess a username or alias. Pass the resolved
+username or alias and a working directory to `run_soql_query`.
+
+For each chief, look for two kinds of signal. Both feed the score.
+
+**(a) Person-level match:** a contact whose name plausibly matches the chief. The contact may
+be the person taking the new role.
+
 ```sql
 SELECT Id, Name, FirstName, LastName, Title, Account.Name, MailingCity, MailingState
-FROM Contact WHERE LastName IN ('Davila','Harris',...)
+FROM Contact WHERE LastName IN ('Davila','Harris')
 ```
-Match on last name first; evaluate first name after. For first-only/truncated names, a
-`FirstName` query is allowed but expect noise — cap confidence accordingly.
 
-**(b) Jurisdiction adjacency (secondary signal)** — contacts at the chief's *new* agency,
-regardless of name. A warm path into that agency, and — critically — sometimes the chief
-themselves under a garbled/partial name (e.g., an "Assistant Police Chief" at the same
-agency being promoted to Chief). Match the jurisdiction token against `Account.Name`:
+Match on last name first, then evaluate first name. For first-only or truncated names a
+first-name query is allowed, but expect noise and cap confidence accordingly.
+
+**(b) Jurisdiction adjacency:** contacts at the chief's new agency regardless of name. That
+is a warm path, and sometimes the chief themselves under a garbled name, such as an assistant
+chief being promoted.
+
 ```sql
 SELECT Id, Name, Title, Account.Name, MailingCity, MailingState
 FROM Contact WHERE Account.Name LIKE '%Kerrville%'
 ```
-**Escape apostrophes** in any name/token (`O'Brien` → `O\'Brien`). Batch where possible.
 
-Data reality in this org: `MailingCity`/`MailingState` are **null on nearly all
-contacts**. The reliable corroborators are **`Account.Name`** (encodes the jurisdiction)
-and **`Title`** (law-enforcement roles). Treat location as a bonus when present, not a
-dependency.
+Escape apostrophes in any name or token. Batch queries where possible.
 
-## Step 4 — Confidence scoring
+Data reality in this org: `MailingCity` and `MailingState` are null on nearly all contacts.
+The reliable corroborators are `Account.Name`, which encodes the jurisdiction, and `Title`,
+which encodes the law-enforcement role. Treat location as a bonus, not a dependency.
 
-Score each surfaced (chief → contact) pair with three 0–100 sub-scores, then combine.
+## Step 4: confidence scoring
 
-- **NameScore** — identity match. Exact first+last ≈ 100; last + first-initial ≈ 85;
-  surname-only ≈ 55; first-only or truncated ≈ 25; phonetically-near but uncertain
-  (e.g. "Gerald" vs "Jerel") ≈ 40; no name overlap = 0 (pure adjacency rows).
-- **AccountTitleScore** — `Account.Name` corresponds to the chief's jurisdiction or to law
-  enforcement generally (+), and `Title` is a law-enforcement role — chief, deputy/
-  assistant chief, sergeant, officer, sheriff (+). Unrelated account/title pulls it down.
-- **LocationScore** — `MailingCity`/`MailingState` matches the meeting jurisdiction. Almost
-  always null here → contributes 0 when absent (do not penalize, just no boost).
+Score each chief-to-contact pair with three sub-scores from 0 to 100, then combine.
 
-Combine (all weights tunable — state them when presenting results):
+- **NameScore:** exact first and last is about 100; last plus first initial about 85;
+  surname only about 55; phonetically near but uncertain about 40; first-only or truncated
+  about 25; no overlap is 0, which is a pure adjacency row.
+- **AccountTitleScore:** `Account.Name` corresponds to the chief's jurisdiction or to law
+  enforcement generally, and `Title` is a law-enforcement role such as chief, deputy or
+  assistant chief, sergeant, officer, or sheriff. An unrelated account or title pulls it down.
+- **LocationScore:** mailing city or state matches the meeting jurisdiction. Almost always
+  null, so it contributes 0 when absent rather than a penalty.
+
+Combine, and state the weights when you present:
 
 ```
 CorroborationScore = 0.7 * AccountTitleScore + 0.3 * LocationScore
-FinalConfidence     = 0.55 * NameScore + 0.45 * CorroborationScore
+FinalConfidence    = 0.55 * NameScore + 0.45 * CorroborationScore
 ```
 
-**Promotion-pattern boost (override).** The highest-value pattern is an internal
-promotion the name match would otherwise miss: a contact **at the chief's new agency**
-holding a **deputy or assistant chief** (or similar second-in-command) title, when that
-agency has just sworn in / announced a new chief. When this pattern holds, **floor
-FinalConfidence at ~80** and label the row **"likely promotion"** — even if NameScore is
-low because the transcript garbled or truncated the chief's name. Rationale: the linear
-blend under-rates this case (a garbled name drags NameScore down, location is usually
-null), yet it's the strongest "someone you know is moving" signal the skill can produce.
-Note explicitly in the "why" that the name is unconfirmed so the user can verify.
+**Promotion-pattern override.** The highest-value pattern is an internal promotion the name
+match misses: a contact at the chief's new agency holding a deputy or assistant chief title
+when that agency has just announced a new chief. Floor FinalConfidence at about 80 and label
+the row "likely promotion", even when NameScore is low because the transcript garbled the
+name. The linear blend under-rates this case, and it is the strongest "someone you know is
+moving" signal the skill can produce. Note in the reasoning that the name is unconfirmed.
 
-Crucial nuances:
-- A person who is **moving jobs usually still shows their OLD account/title** in the CRM.
-  So for a *person-level* match, jurisdiction overlap with the NEW post is NOT expected —
-  **title relevance** (they're in law enforcement somewhere) is the real corroborator, not
-  account-jurisdiction match. Don't penalize a strong name match for being at a different
-  agency; that's consistent with a move.
-- For a **jurisdiction-adjacency** row, NameScore is low/zero, so FinalConfidence is driven
-  by AccountTitleScore. Watch for the high-value special case: a law-enforcement contact at
-  the chief's new agency whose name is phonetically near the (garbled) chief name — that
-  may be a real promotion the name match missed. Flag it prominently.
+Two nuances:
 
-Label every surfaced row as **Person match** or **Jurisdiction adjacency**, give a short
-concrete "why" citing the sub-scores, and **sort all rows by FinalConfidence descending**.
+- A person moving jobs usually still shows their old account and title in the CRM. For a
+  person-level match, jurisdiction overlap with the new post is not expected. Title relevance
+  is the real corroborator. Do not penalize a strong name match for sitting at a different
+  agency; that is consistent with a move.
+- For a jurisdiction-adjacency row, NameScore is low, so AccountTitleScore drives the result.
+  Watch for a law-enforcement contact at the new agency whose name is phonetically near the
+  garbled chief name. Flag that prominently.
 
-## Step 5 — Present the results
+Label every row "Person match" or "Jurisdiction adjacency", give a short concrete reason
+citing the sub-scores, and sort by FinalConfidence descending.
 
-Lead with a one-line summary: chiefs found across the states/window, how many produced a
-person match, how many produced a jurisdiction adjacency.
+## Step 5: present
 
-Then a markdown table sorted by confidence:
+Lead with one line: chiefs found across the states and window, how many produced a person
+match, how many produced a jurisdiction adjacency. With no CRM attached, say so in that same
+line and present the transitions with warm-path suggestions.
 
-| Confidence | Type | Chief (new role, state) | Status | Matched contact (title @ account) | Why (sub-scores) | Meeting (date) |
+Then a table sorted by confidence:
+
+| Confidence | Type | Chief (new role, state) | Status | Matched contact (title at account) | Why (sub-scores) | Meeting (date) |
 |---|---|---|---|---|---|---|
 
 - State the weights used so the user can recalibrate.
-- Then a brief **bucket of nameless/non-transition mentions** (jurisdiction + state, or a
-  count) so coverage is visible — but keep the spotlight on scored matches.
-- Include meeting links so every signal is verifiable.
+- Add a short bucket of nameless or non-transition mentions, by jurisdiction and state or as
+  a count, so coverage is visible. Keep the spotlight on scored matches.
+- Include the `cloverleaf_url` for every row so each signal is verifiable.
 
-## Boundaries and future direction
+## Boundaries
 
-- **Read-only.** No writes to Salesforce (no contacts, tasks, notes) unless the user
-  explicitly asks in a later turn — and confirm before any write.
-- **State-level for now.** City/county/agency targeting, natural-language search, and CSV/
-  file export are expected future iterations — don't imply they exist yet.
-- **Handle tool hiccups gracefully.** Searches can return errors (e.g. a 500 from document
-  search) or empty sets; note it, fall back (different terms/source), and keep going rather
-  than stalling.
+- **Read-only.** No CRM writes: no contacts, tasks, or notes, unless the user explicitly asks
+  in a later turn, and confirm before any write.
+- **State level for now.** City, county, and agency targeting, natural-language search, and
+  file export are future iterations. Do not imply they exist.
+- **Handle failures gracefully.** A search can error or return nothing. Note it, fall back to
+  different terms or a different source, and keep going rather than stalling.
