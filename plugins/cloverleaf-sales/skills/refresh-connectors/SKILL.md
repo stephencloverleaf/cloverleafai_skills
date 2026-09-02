@@ -55,7 +55,7 @@ Record the bare tool name, dropping the server id prefix.
 
 4. **Document each new tool.** Append a row to the tool matrix in the connector's
    reference skill (`cloverleaf-mcp-operations` for Cloverleaf, the analogous skill for
-   another connector), formatted `| TOOL_NAME | <today's date> | DESCRIPTION |`. Then list
+   another connector), formatted `| TOOL_NAME | TODAY | DESCRIPTION |`. Then list
    in your report which workflow skills could use it and why. Do not rewrite a workflow
    skill to adopt a new tool unless the user asks.
 
