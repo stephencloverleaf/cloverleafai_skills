@@ -93,6 +93,8 @@ The `cloverleaf-sales` plugin ships 13 skills, grouped by role:
 
 ## Add or change a skill
 
+The claude.ai upload validator rejects a skill whose frontmatter `description` contains angle-bracket text such as `<states>`. Use uppercase placeholders (`STATE_CODES`) in descriptions. Angle brackets in the body are accepted.
+
 1. Edit `plugins/cloverleaf-sales/skills/<name>/SKILL.md`. Skills are auto-discovered; a new
    one needs a `name` and `description` in its frontmatter.
 2. Run `python3 scripts/check_tool_drift.py`. It must report `0 FAIL`.
