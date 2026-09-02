@@ -7,6 +7,7 @@ to `main` is a release. Entries are newest first.
 
 Scope narrowed to MCP connector skills; optimization pass.
 
+- Verified the claude.ai web app plugin install against this repo (Cloverleaf sales, version 1). Refresh behavior test commit.
 - Merged `cloverleaf-ai-profile` into `vendor-profile` and deleted the `cloverleaf-ai-profile`
   folder. `vendor-profile` gained the predecessor's primary-industry line, products list,
   pain-points list, and `anchored_terms` mapping; fixed the stale 25-result cap claim
