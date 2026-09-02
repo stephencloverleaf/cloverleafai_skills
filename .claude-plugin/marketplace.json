@@ -1,0 +1,23 @@
+{
+  "name": "cloverleafai-skills",
+  "owner": {
+    "name": "Cloverleaf AI",
+    "email": "stephen@cloverleaf.ai"
+  },
+  "metadata": {
+    "description": "Cloverleaf AI sales skills for Claude Code, the Claude desktop app, and claude.ai."
+  },
+  "plugins": [
+    {
+      "name": "cloverleaf-sales",
+      "source": "./plugins/cloverleaf-sales",
+      "description": "Find pre-RFP buying signals in government meetings, enrich them into opportunities, and write the outreach, under the house sales-communication standard.",
+      "author": {
+        "name": "Stephen White",
+        "email": "stephen@cloverleaf.ai"
+      },
+      "category": "sales",
+      "keywords": ["cloverleaf", "government", "sales", "signals"]
+    }
+  ]
+}

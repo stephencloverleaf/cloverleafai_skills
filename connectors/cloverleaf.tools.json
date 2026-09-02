@@ -1,0 +1,89 @@
+{
+  "connector": "cloverleaf",
+  "server": "Cloverleaf AI MCP (claude.ai connector)",
+  "snapshot": "2026-09-02",
+  "snapshot_source": "Live tool list observed in a Claude Code session on 2026-09-02",
+  "tools": [
+    {
+      "name": "get-bill",
+      "description": "One bill: number, title, status and progress, chamber, session, and sponsors with party and district."
+    },
+    {
+      "name": "get-bill-documents",
+      "description": "A bill's texts, amendments, and supplements. Each carries a meeting_document_id readable through get-document."
+    },
+    {
+      "name": "get-bill-events",
+      "description": "Scheduled hearings and floor votes for a bill, with date, time, and room."
+    },
+    {
+      "name": "get-bill-status-changes",
+      "description": "Merged status timeline for a bill. Filter event_kind == \"history\" for official status changes; major: true flags the big moves."
+    },
+    {
+      "name": "get-document",
+      "description": "One document by ID. Also serves legislation documents, which carry organization_id: null and a bill_id."
+    },
+    {
+      "name": "get-meeting",
+      "description": "Metadata, video URL, and cloverleaf_url for one meeting ID."
+    },
+    {
+      "name": "get-meeting-transcripts",
+      "description": "Full transcript for one meeting. Large, and reserved for opportunity-enrichment on shortlisted signals."
+    },
+    {
+      "name": "list-contacts",
+      "description": "Role-keyed civic contact roster (name, title, email, direct phone) by organization or geography."
+    },
+    {
+      "name": "list-organization-meetings",
+      "description": "Walk one jurisdiction's meetings newest-first. The preferred single-entity tool."
+    },
+    {
+      "name": "lookup-organization",
+      "description": "Resolve a jurisdiction name to a numeric organization ID. Returns meeting_count and last_published_at per match; embedding-ranked, so read the whole list."
+    },
+    {
+      "name": "run-document-keyword-search",
+      "description": "Lexical agenda, packet, and procurement text search. states works (verified [\"TX\"], 186 hits). sortBy accepts hits or meeting_date, with direction."
+    },
+    {
+      "name": "run-legislation-keyword-search",
+      "description": "Lexical search over bill texts, amendments, and supplements."
+    },
+    {
+      "name": "run-meeting-keyword-search",
+      "description": "Lexical transcript search with anchor terms (mustIncludeTerms plus proximity). perPage up to 100 with real page pagination; the old 25-meeting cap is gone."
+    },
+    {
+      "name": "run-purchase-keyword-search",
+      "description": "Lexical keyword search over the same purchase records; `terms` must be an array (same shape as run-meeting-keyword-search). Parameter schema not published by the server as of 2026-09-02."
+    },
+    {
+      "name": "search-campaigns",
+      "description": "Saved campaigns as search-spec templates. Read-only, and the payload arrives inline."
+    },
+    {
+      "name": "search-documents",
+      "description": "Semantic natural-language search over meeting documents. The intent-based procurement finder; returns per-chunk score and per-document best_score."
+    },
+    {
+      "name": "search-insights",
+      "description": "Already-generated AI insights with Signal Match scores. Free, and always the first call. Scoped to the authenticated user (pass userId for a teammate) and accepts states."
+    },
+    {
+      "name": "search-legislation",
+      "description": "Semantic search over state legislation documents. Returns bill_id for the bill tools."
+    },
+    {
+      "name": "search-meetings",
+      "description": "Semantic natural-language transcript search. The fallback discovery tool when insights are thin."
+    },
+    {
+      "name": "search-purchases",
+      "description": "Semantic search over purchase and contract-award records (purchase_dataset_id 1: federal contract awards with USAspending-style CONT_AWD ids; fields amount, vendor_name, department, purchase_description, transaction_date, organization_ids). Params query, daysBack, page, perPage (numbers). Returns total_hits, page, per_page, purchases[]."
+    }
+  ],
+  "description_source": "Tool matrix in plugins/cloverleaf-sales/skills/cloverleaf-mcp-operations/SKILL.md (verified 2026-08-18), plus live observation of the purchases tools on 2026-09-02."
+}

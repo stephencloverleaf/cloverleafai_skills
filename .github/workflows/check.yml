@@ -1,0 +1,31 @@
+name: check
+
+# CI cannot refresh the connector manifests: reading a live MCP tool list needs a
+# signed-in Claude session with the connectors attached. This workflow only guards the
+# snapshot that is committed. Refreshing is the job of the refresh-connectors skill,
+# run weekly per routines/skills-connector-refresh.md.
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate the connector manifests
+        run: |
+          python3 -c "import json; json.load(open('connectors/cloverleaf.tools.json'))"
+          python3 -c "import json; json.load(open('connectors/apollo.tools.json'))"
+          python3 -c "import json; json.load(open('connectors/retired.json'))"
+          python3 -c "import json; json.load(open('.claude-plugin/marketplace.json'))"
+          python3 -c "import json; json.load(open('plugins/cloverleaf-sales/.claude-plugin/plugin.json'))"
+
+      - name: Check for connector tool drift
+        run: python3 scripts/check_tool_drift.py

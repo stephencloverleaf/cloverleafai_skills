@@ -1,0 +1,301 @@
+{
+  "connector": "apollo",
+  "server": "Apollo.io MCP (claude.ai connector)",
+  "snapshot": "2026-09-02",
+  "snapshot_source": "Live tool list observed in a Claude Code session on 2026-09-02",
+  "tools": [
+    {
+      "name": "apollo_accounts_bulk_create",
+      "description": ""
+    },
+    {
+      "name": "apollo_accounts_create",
+      "description": ""
+    },
+    {
+      "name": "apollo_accounts_update",
+      "description": ""
+    },
+    {
+      "name": "apollo_analytics_sync_report",
+      "description": ""
+    },
+    {
+      "name": "apollo_contacts_bulk_create",
+      "description": ""
+    },
+    {
+      "name": "apollo_contacts_create",
+      "description": ""
+    },
+    {
+      "name": "apollo_contacts_search",
+      "description": ""
+    },
+    {
+      "name": "apollo_contacts_update",
+      "description": ""
+    },
+    {
+      "name": "apollo_context_center_create_product",
+      "description": ""
+    },
+    {
+      "name": "apollo_context_center_create_profile",
+      "description": ""
+    },
+    {
+      "name": "apollo_context_center_show",
+      "description": ""
+    },
+    {
+      "name": "apollo_context_center_show_product",
+      "description": ""
+    },
+    {
+      "name": "apollo_context_center_update_product",
+      "description": ""
+    },
+    {
+      "name": "apollo_context_center_update_profile",
+      "description": ""
+    },
+    {
+      "name": "apollo_conversations_get_insights",
+      "description": ""
+    },
+    {
+      "name": "apollo_conversations_get_recording_links",
+      "description": ""
+    },
+    {
+      "name": "apollo_conversations_get_transcript",
+      "description": ""
+    },
+    {
+      "name": "apollo_conversations_search",
+      "description": ""
+    },
+    {
+      "name": "apollo_deals_create",
+      "description": ""
+    },
+    {
+      "name": "apollo_deals_search",
+      "description": ""
+    },
+    {
+      "name": "apollo_deals_show",
+      "description": ""
+    },
+    {
+      "name": "apollo_domain_purchase_index",
+      "description": ""
+    },
+    {
+      "name": "apollo_email_account_purchase_create",
+      "description": ""
+    },
+    {
+      "name": "apollo_email_account_purchase_index",
+      "description": ""
+    },
+    {
+      "name": "apollo_email_accounts_index",
+      "description": ""
+    },
+    {
+      "name": "apollo_emailer_campaigns_activity_feed",
+      "description": ""
+    },
+    {
+      "name": "apollo_emailer_campaigns_add_contact_ids",
+      "description": ""
+    },
+    {
+      "name": "apollo_emailer_campaigns_approve",
+      "description": ""
+    },
+    {
+      "name": "apollo_emailer_campaigns_remove_or_stop_contact_ids",
+      "description": ""
+    },
+    {
+      "name": "apollo_emailer_campaigns_search",
+      "description": ""
+    },
+    {
+      "name": "apollo_emailer_campaigns_show",
+      "description": ""
+    },
+    {
+      "name": "apollo_emailer_messages_create",
+      "description": ""
+    },
+    {
+      "name": "apollo_emailer_messages_email_send_status",
+      "description": ""
+    },
+    {
+      "name": "apollo_emailer_messages_get_content",
+      "description": ""
+    },
+    {
+      "name": "apollo_emailer_messages_search",
+      "description": ""
+    },
+    {
+      "name": "apollo_emailer_messages_send_now",
+      "description": ""
+    },
+    {
+      "name": "apollo_emailer_schedules_index",
+      "description": ""
+    },
+    {
+      "name": "apollo_feedback_log",
+      "description": ""
+    },
+    {
+      "name": "apollo_fields_index",
+      "description": ""
+    },
+    {
+      "name": "apollo_labels_add_entity_ids_to_label_names",
+      "description": ""
+    },
+    {
+      "name": "apollo_labels_create",
+      "description": ""
+    },
+    {
+      "name": "apollo_labels_index",
+      "description": ""
+    },
+    {
+      "name": "apollo_labels_remove_entity_ids_from_label_names",
+      "description": ""
+    },
+    {
+      "name": "apollo_labels_update",
+      "description": ""
+    },
+    {
+      "name": "apollo_mixed_companies_search",
+      "description": ""
+    },
+    {
+      "name": "apollo_mixed_people_api_search",
+      "description": ""
+    },
+    {
+      "name": "apollo_organizations_bulk_enrich",
+      "description": ""
+    },
+    {
+      "name": "apollo_organizations_enrich",
+      "description": ""
+    },
+    {
+      "name": "apollo_organizations_job_postings",
+      "description": ""
+    },
+    {
+      "name": "apollo_organizations_lookup",
+      "description": ""
+    },
+    {
+      "name": "apollo_people_bulk_match",
+      "description": ""
+    },
+    {
+      "name": "apollo_people_match",
+      "description": ""
+    },
+    {
+      "name": "apollo_phone_calls_create",
+      "description": ""
+    },
+    {
+      "name": "apollo_phone_calls_search",
+      "description": ""
+    },
+    {
+      "name": "apollo_phone_calls_update",
+      "description": ""
+    },
+    {
+      "name": "apollo_sequences_create",
+      "description": ""
+    },
+    {
+      "name": "apollo_sequences_update",
+      "description": ""
+    },
+    {
+      "name": "apollo_tasks_bulk_create",
+      "description": ""
+    },
+    {
+      "name": "apollo_tasks_complete",
+      "description": ""
+    },
+    {
+      "name": "apollo_tasks_create",
+      "description": ""
+    },
+    {
+      "name": "apollo_tasks_search",
+      "description": ""
+    },
+    {
+      "name": "apollo_tasks_show",
+      "description": ""
+    },
+    {
+      "name": "apollo_tasks_skip",
+      "description": ""
+    },
+    {
+      "name": "apollo_tasks_update",
+      "description": ""
+    },
+    {
+      "name": "apollo_usage_stats_credit_usage_stats",
+      "description": ""
+    },
+    {
+      "name": "apollo_users_api_profile",
+      "description": ""
+    },
+    {
+      "name": "apollo_users_search",
+      "description": ""
+    },
+    {
+      "name": "apollo_webhook_result_show",
+      "description": ""
+    },
+    {
+      "name": "apollo_website_visitor_domain_tracker_index",
+      "description": ""
+    },
+    {
+      "name": "apollo_website_visitor_domain_tracker_install_script",
+      "description": ""
+    },
+    {
+      "name": "apollo_website_visitor_domain_tracker_send_install_email",
+      "description": ""
+    },
+    {
+      "name": "apollo_website_visitor_domain_tracker_update",
+      "description": ""
+    },
+    {
+      "name": "apollo_website_visitors_domain_aggregates",
+      "description": ""
+    }
+  ],
+  "description_source": "Names only. Descriptions are filled in by the refresh-connectors skill from the live connector."
+}

@@ -1,0 +1,115 @@
+{
+  "note": "Names that must never appear in a skill. Update this file whenever a connector drops or renames a tool.",
+  "retired": [
+    {
+      "name": "search",
+      "connector": "cloverleaf",
+      "retired_on": "2026-08-18",
+      "replaced_by": [
+        "search-meetings",
+        "search-insights"
+      ],
+      "note": "The bare transcript search tool is gone. Use search-meetings for semantic transcript search, run-meeting-keyword-search for lexical, and search-insights for already-generated insights."
+    },
+    {
+      "name": "run_meeting_keyword_search",
+      "connector": "cloverleaf",
+      "retired_on": "2026-08-18",
+      "replaced_by": [
+        "run-meeting-keyword-search"
+      ],
+      "note": "Underscore spelling. Every Cloverleaf tool name uses hyphens."
+    },
+    {
+      "name": "search_insights",
+      "connector": "cloverleaf",
+      "retired_on": "2026-08-18",
+      "replaced_by": [
+        "search-insights"
+      ],
+      "note": "Underscore spelling."
+    },
+    {
+      "name": "account_research",
+      "connector": "zoominfo",
+      "retired_on": "2026-08-11",
+      "replaced_by": [
+        "apollo_organizations_enrich",
+        "apollo_mixed_people_api_search"
+      ],
+      "note": "ZoomInfo was retired on 2026-08-11 and its MCP server is disconnected. Calls returned nothing rather than failing."
+    },
+    {
+      "name": "contact_research",
+      "connector": "zoominfo",
+      "retired_on": "2026-08-11",
+      "replaced_by": [
+        "apollo_people_match"
+      ],
+      "note": "See the enrichment-provider skill for the full mapping."
+    },
+    {
+      "name": "search_companies",
+      "connector": "zoominfo",
+      "retired_on": "2026-08-11",
+      "replaced_by": [
+        "apollo_mixed_companies_search"
+      ],
+      "note": "See the enrichment-provider skill."
+    },
+    {
+      "name": "search_contacts",
+      "connector": "zoominfo",
+      "retired_on": "2026-08-11",
+      "replaced_by": [
+        "apollo_mixed_people_api_search"
+      ],
+      "note": "See the enrichment-provider skill."
+    },
+    {
+      "name": "enrich_companies",
+      "connector": "zoominfo",
+      "retired_on": "2026-08-11",
+      "replaced_by": [
+        "apollo_organizations_enrich"
+      ],
+      "note": "See the enrichment-provider skill."
+    },
+    {
+      "name": "enrich_contacts",
+      "connector": "zoominfo",
+      "retired_on": "2026-08-11",
+      "replaced_by": [
+        "apollo_people_match"
+      ],
+      "note": "See the enrichment-provider skill."
+    },
+    {
+      "name": "get_recommended_contacts",
+      "connector": "zoominfo",
+      "retired_on": "2026-08-11",
+      "replaced_by": [
+        "apollo_mixed_people_api_search"
+      ],
+      "note": "See the enrichment-provider skill."
+    },
+    {
+      "name": "enrich_scoops",
+      "connector": "zoominfo",
+      "retired_on": "2026-08-11",
+      "replaced_by": [
+        "apollo_organizations_job_postings"
+      ],
+      "note": "Apollo has no scoops or news feed. Job postings are the nearest urgency tell; do not promise an equivalent."
+    },
+    {
+      "name": "enrich_news",
+      "connector": "zoominfo",
+      "retired_on": "2026-08-11",
+      "replaced_by": [
+        "apollo_organizations_job_postings"
+      ],
+      "note": "See enrich_scoops."
+    }
+  ]
+}

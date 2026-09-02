@@ -1,0 +1,10 @@
+{
+  "name": "cloverleaf-sales",
+  "description": "Find pre-RFP buying signals in government meetings, enrich them into opportunities, and write the outreach, under the house sales-communication standard.",
+  "author": {
+    "name": "Stephen White",
+    "email": "stephen@cloverleaf.ai"
+  },
+  "repository": "https://github.com/stephencloverleaf/cloverleafai_skills",
+  "keywords": ["cloverleaf", "government", "sales", "signals", "public-sector", "outreach"]
+}
