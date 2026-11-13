@@ -26,9 +26,10 @@ list with warm-path suggestions.
 
 ## Gather first
 
-- **Geographies.** State level. Cloverleaf search filters natively by state and accepts
-  two-letter codes or full names. Ask which states if the user has not said. City, county,
-  and agency-level targeting is a future iteration; do not promise it.
+- **Geographies.** State level by default. Cloverleaf search filters by state and accepts
+  two-letter codes or full names. Ask which states if the user has not said. When the user
+  names a county or city, add `counties` or `cities` to the same call. A city or county
+  filter matches every body located there, not one agency.
 - **Time window.** Default to the last 14 days. Mention the default when you ask about
   geography so the user can override it in the same reply.
 
@@ -75,8 +76,8 @@ Name-recovery rules learned the hard way:
   recovery.** Without `states` it floods with nationwide noise.
 - **Treat every name as unconfirmed until you check it.** `get-meeting-transcripts` returns
   no speaker on essentially every line, and `run-meeting-keyword-search` populates a person
-  block that is sometimes confidently wrong. Confirm against minutes, an official roster, or
-  a press release before presenting a name as fact.
+  block that is sometimes confidently wrong. Confirm against minutes, an official roster,
+  `search-verified-speakers`, or a press release before presenting a name as fact.
 - Speech-to-text garbles names. Expect first-only ("Ron"), surname-only ("Davila"), and
   truncated ("Gerald L.") forms. Surface the chief anyway. Flag what is missing and let
   scoring carry the uncertainty.
@@ -190,7 +191,8 @@ Then a table sorted by confidence:
 
 - **Read-only.** No CRM writes: no contacts, tasks, or notes, unless the user explicitly asks
   in a later turn, and confirm before any write.
-- **State level for now.** City, county, and agency targeting, natural-language search, and
-  file export are future iterations. Do not imply they exist.
+- **State level by default.** County and city filters work when the user asks for them.
+  Agency targeting, natural-language search, and file export are future iterations. Do not
+  imply they exist.
 - **Handle failures gracefully.** A search can error or return nothing. Note it, fall back to
   different terms or a different source, and keep going rather than stalling.

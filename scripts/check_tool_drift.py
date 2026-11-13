@@ -29,8 +29,9 @@ UUID_PREFIX = re.compile(
 FAMILIES = {
     "apollo": re.compile(r"^apollo_"),
     "cloverleaf": re.compile(
-        r"^(search-[a-z]+|run-[a-z]+-keyword-search|get-bill(-[a-z-]+)?"
-        r"|get-meeting(-transcripts)?|get-document|list-[a-z-]+|lookup-organization)$"
+        r"^(search-[a-z]+(-[a-z]+)*|run-[a-z]+-keyword-search|get-bill(-[a-z-]+)?"
+        r"|get-meeting(-transcripts)?|get-document|get-budget-[a-z-]+|get-signals-feed"
+        r"|list-[a-z-]+|lookup-organization|budget-rollup|save-signal-to-tasks)$"
     ),
 }
 

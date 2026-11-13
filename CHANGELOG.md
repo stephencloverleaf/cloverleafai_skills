@@ -3,6 +3,50 @@
 Claude Code resolves this marketplace by commit, so there are no version numbers. Every merge
 to `main` is a release. Entries are newest first.
 
+## 2026-11-13
+
+Connector refresh: full live re-test of the Cloverleaf MCP reference.
+
+- `connectors/cloverleaf.tools.json`: re-snapshotted from the live schemas. 31 tools, up from
+  20. Added `budget-rollup`, `get-budget-line-item`, `get-signals-feed`, `list-budget-books`,
+  `list-budget-categories`, `list-budget-departments`, `list-salesforce-account-mappings`,
+  `list-territory-channels`, `save-signal-to-tasks`, `search-budget-line-items`, and
+  `search-verified-speakers`. No tool was removed or renamed.
+- `scripts/check_tool_drift.py`: widened the Cloverleaf name pattern so the added tool names
+  are checked against the manifest.
+- `cloverleaf-mcp-operations`: every tool re-verified; 30 called live, `save-signal-to-tasks`
+  by schema only. Corrected claims that no longer hold:
+  - Meeting and document searches take `cities`, `counties`, `channelTypes`, and
+    `organizationIds`. State is no longer the finest geographic filter.
+  - On semantic tools, `total_meeting_hits` and `total_document_hits` count only the entities
+    inside the top 100 chunks. They are floors, not true counts.
+  - Purchases are no longer federal only. Local datasets name the buyer in
+    `organization_names`, so rule 10 now branches on the dataset.
+  - `run-document-keyword-search` rejects an unknown `sortBy` instead of falling back.
+  - Search excerpts carry their own `cloverleaf_url`, and excerpt timestamps matched the
+    transcript on eight of eight samples, so the "re-derive the timestamp" rule is now a
+    fallback.
+  - `search-insights` defaults to 5 rows, `includeFullResult` works, and the "nothing scores
+    below 6" calibration was account specific.
+  - `get-meeting-transcripts` and `search-campaigns` are paginated. `list-contacts` has no
+    `removed_at` field.
+- `cloverleaf-mcp-operations`: added rule 11 (state wide semantic searches time out past 30
+  days; slice the window or narrow the scope), rule 12 (budget figures), the signals feed and
+  budget plays, a note that `search-purchases` returned zero rows on every probe, and
+  `references/budget-tools.md`. Rule numbers 1 through 10 are unchanged.
+- `refresh-connectors`: ToolSearch returns full schemas and typed parameters in Claude Code
+  as of this date; the name-only behavior is kept as a fallback note.
+- Workflow skills brought in line with the corrected reference. `cloverleaf-signal-search`,
+  `document-signal-search`, `rfp-timeline`, `opportunity-enrichment`, `signal-dashboard`,
+  `government-entity-profile`, `police-chief-transitions`, `territory-monitor`,
+  `vendor-profile`, and `demo-mcp` now scope with `counties`, `cities`, or
+  `organizationIds` instead of filtering client side, keep state wide semantic searches to
+  30 days, read purchases through `run-purchase-keyword-search` with the buyer found by
+  dataset, cite the excerpt's own `cloverleaf_url`, and mention `get-signals-feed` and
+  `search-verified-speakers` where they fit. The `removed_at` contact filter is gone.
+- Not changed: `signal-dashboard/scripts/build_dashboard.py` still links each card to the
+  meeting's `cloverleaf_url`, not the excerpt's.
+
 ## 2026-09-02
 
 Scope narrowed to MCP connector skills; optimization pass.

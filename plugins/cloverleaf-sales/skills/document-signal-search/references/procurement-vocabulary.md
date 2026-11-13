@@ -47,7 +47,7 @@ only the rare specific phrases from the safe list.
 search-documents(
     query    = "upcoming award or renewal of cybersecurity, endpoint, or managed detection contracts",
     states   = ["TX"],
-    daysBack = 90,
+    daysBack = 30,                 # state wide semantic: 30 days at most
     perPage  = 10,
 )
 ```
@@ -70,8 +70,10 @@ run-document-keyword-search(
 ## Calibrating a term
 
 The old `docs_count_per_search_term` aggregation is gone. Calibrate by running the term at
-`perPage = 1` and reading `total_document_hits`, which is the true document count.
-`total_hits` on the semantic tool counts chunks and caps at 100.
+`perPage = 1` on `run-document-keyword-search` and reading `total_hits`, which is the true
+document count. That tool has no `total_document_hits` field. On `search-documents`,
+`total_hits` counts chunks and caps at 100, and `total_document_hits` counts only the
+documents inside those chunks, so at 100 it is a floor.
 
 ## Cooperative contract vehicles
 

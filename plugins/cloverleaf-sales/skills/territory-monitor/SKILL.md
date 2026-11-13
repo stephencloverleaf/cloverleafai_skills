@@ -47,7 +47,9 @@ hardcoded geography.
 
 **Layer 0, insights.** `search-insights(searchTerm, states = territory)`. Free, so it
 always runs first. Filter on `created_at` yourself, because the tool has no date
-parameter. Skip 0/10 gate excluded rows.
+parameter. Skip 0/10 rows. When the rep wants their top signals, `get-signals-feed` returns
+the scored signals with a numeric `score`, sorted by score, and is the faster read;
+`search-insights` stays as the text search over everything the user owns.
 
 **Layer 1, spoken signals.** `run-meeting-keyword-search` with `terms`, `states`, the
 window, and `perPage` up to 100. Paginate rather than narrowing when the first page fills.

@@ -1,6 +1,6 @@
 ---
 name: document-signal-search
-description: "Mine Cloverleaf's meeting documents, state legislation, and federal award records for procurement stage buying signals: contract awards, renewals, RFP and solicitation releases, budget line items, named vendor dollar figures, and statutory mandates that create budgets. Use whenever the task is about what a jurisdiction is buying rather than what it is discussing, for example find RFPs for X, who is renewing a contract, search agendas or packets for procurement, any cybersecurity contracts on consent agendas, what is about to be awarded, find dollar amounts or not to exceed items, who won this federal contract, or what law is about to force this spend. This is the document side counterpart to cloverleaf-signal-search, which mines spoken transcripts. Feeds signal-dashboard, opportunity-enrichment, and signal-outreach."
+description: "Mine Cloverleaf's meeting documents, state legislation, and federal and local award records for procurement stage buying signals: contract awards, renewals, RFP and solicitation releases, budget line items, named vendor dollar figures, and statutory mandates that create budgets. Use whenever the task is about what a jurisdiction is buying rather than what it is discussing, for example find RFPs for X, who is renewing a contract, search agendas or packets for procurement, any cybersecurity contracts on consent agendas, what is about to be awarded, find dollar amounts or not to exceed items, who won this federal contract, or what law is about to force this spend. This is the document side counterpart to cloverleaf-signal-search, which mines spoken transcripts. Feeds signal-dashboard, opportunity-enrichment, and signal-outreach."
 ---
 
 # Document signal search
@@ -15,7 +15,7 @@ you present.
 |---|---|---|
 | Legislation | `search-legislation`, `run-legislation-keyword-search`, `get-bill`, `get-bill-documents`, `get-bill-events`, `get-bill-status-changes` | Upstream mandate. A requirement or fund created before any agenda item exists. |
 | Meeting documents | `search-documents`, `run-document-keyword-search`, `get-document` | Budget line item through solicitation, award, and renewal. The core of this skill. |
-| Federal awards | `search-purchases`, `run-purchase-keyword-search` | Award already made. Who won, for how much, when. |
+| Awards and contracts | `run-purchase-keyword-search` | Award already made. Who won, for how much, when. |
 
 A transcript line ("one ransomware attack and the city is shut down") is pain. A document
 line ("award a three year contract to CDW Government LLC for Palo Alto enterprise
@@ -28,8 +28,10 @@ Parameters, limits, and response shapes are in `cloverleaf-mcp-operations`. Load
 ## Procedure
 
 1. **Open semantically.** `search-documents` with a sentence naming the deal type and the
-   solution area, plus `states` and `daysBack` 60 to 120. This finds award and renewal
-   language without you guessing the vocabulary. Rank by `best_score`.
+   solution area, plus `states` and `daysBack` 30 at most. This finds award and renewal
+   language without you guessing the vocabulary. Rank by `best_score`. For a longer state
+   wide range, walk it in 30 day slices with `startDate` and `endDate`, or scope with
+   `organizationIds`, `counties`, or `cities`. A timeout is not an empty result.
 2. **Go lexical for precision.** `run-document-keyword-search` with named vendors, product
    names, and rare procurement phrases. Set `sortBy = "hits"` so signal dense documents
    outrank whatever was published most recently.
@@ -74,29 +76,31 @@ contract number, and the amount. That makes documents the best source for incumb
 displacement intel: search the incumbent's product name here and read the renewal date off
 the contract item.
 
-## The federal awards layer
+## The awards and contracts layer
 
-`search-purchases` (semantic) and `run-purchase-keyword-search` (lexical) search contract
-award records. Verified 2026-09-02 against a live probe.
+`run-purchase-keyword-search` searches contract award and purchase records. Use it, not
+`search-purchases`: the semantic tool returned zero rows on every probe on 2026-11-13, so
+treat a semantic zero as a tool gap. Verified 2026-11-13 against a live probe.
 
-- Dataset 1 is federal contract awards with USAspending style `CONT_AWD` ids. Rows carry
-  `amount`, `vendor_name`, `department`, `purchase_description`, `transaction_date`, and
-  `source_row_id`.
+- Dataset 1 is federal contract awards with USAspending style `CONT_AWD` ids. Local
+  datasets sit beside it (seen: City of Dallas, County of Collin, Long Beach, Santa
+  Clarita, Miami-Dade, Los Angeles MTA, County of Boone, Detroit, and Washington DC).
+  Rows carry `amount`, `vendor_name`, `department`, `purchase_description`,
+  `transaction_date`, and `source_row_id`.
 - **Award stage, not open solicitations.** These tools answer who won and for how much.
   They do not list what is currently biddable, so never present a purchase row as an open
   opportunity.
-- **Coverage beyond federal is unverified as of 2026-09-02.** Every sampled row was a
-  federal department. Do not tell a customer this layer covers state or local awards
-  until someone has confirmed it.
-- **`department` is the buyer.** `organization_ids` and `organization_names` came back
-  identical on every row (the whole federal org list), so they associate the dataset with
-  Cloverleaf orgs rather than identify the awarding body.
+- **Find the buyer by dataset.** On federal rows `department` is the buyer, and
+  `organization_names` is the whole federal org list. On local rows `organization_names`
+  is the buyer and `department` is a division or null.
 - **No `cloverleaf_url` on a purchase row.** Cite the award by `source_row_id`,
   `department`, `vendor_name`, and `transaction_date` instead of building a link.
-- `amount` can be 0 on a contract modification, and `start_date` and `end_date` were null
-  on every sampled row.
+- `amount` can be 0 or null, and `transaction_date` can be null. Local rows often carry
+  `start_date` and `end_date` for the contract term, which is a renewal timing signal.
+- The keyword tool filters by `states`, `organizations` (org ids), `vendorNames`,
+  `departments`, and `amount`.
 
-Use it for displacement research on a federal target, for confirming who holds an
+Use it for displacement research on a target, for confirming who holds an
 incumbent contract, and as the award anchor `rfp-timeline` traces backward from.
 
 ## The legislation layer
@@ -105,7 +109,8 @@ Procurement is sometimes created by statute before it reaches any agenda. A sign
 mandate today is a consent agenda contract in 6 to 18 months, so use this layer to get
 ahead of the documents this skill mines.
 
-Search with `daysBack` 180 or more; the default window runs the past 7 days through the
+Search with `run-legislation-keyword-search` at `daysBack` 180 or more, or walk
+`search-legislation` in 30 day slices; the default window runs the past 7 days through the
 next 365 and is nearly empty in practice. Zero results for a state are often a session
 calendar gap rather than missing coverage, because biennial legislatures do not sit every
 year. Cite each bill's `cloverleaf_url` and never a legiscan.com URL. Recipes are in
@@ -113,10 +118,10 @@ year. Cite each bill's `cloverleaf_url` and never a legiscan.com URL. Recipes ar
 
 ## Territory scoping
 
-Pass `states`; it works on both document tools and validates on `search-purchases`. State
-is the finest geographic filter, and there is no county or city parameter. For a county or
-a single account, resolve `organization_id`s with `lookup-organization` (skip orgs with
-`meeting_count: 0`) and filter hits to that set.
+Pass `states`; it works on both document tools. Both also take `cities`, `counties`,
+`channelTypes`, and `organizationIds`. A city or county filter matches every body located
+there (school district, utility, county), so for a single account resolve the id with
+`lookup-organization` (skip orgs with `meeting_count: 0`) and pass `organizationIds`.
 
 Results carry `organization_id` only. Resolve the name from your territory map, or cross
 reference a meeting side search on the same org, whose `meetings[]` array carries

@@ -1,6 +1,6 @@
 ---
 name: rfp-timeline
-description: "Trace a government contract award backward through Cloverleaf to the originating RFP or bid announcement and to the first spoken pain signal, then render the procurement arc as a timeline with a contact layer. Use whenever the user says trace this contract back, when did they first talk about this, show me the full procurement timeline, find recent awards and trace them back, what was the pain point before they awarded this contract, who won and when did it start, or asks for N recent contract awards in a given state. Use this instead of signal-dashboard when the goal is depth over time on one procurement event rather than breadth across active pain signals. Award sources are meeting documents, transcripts, and the federal purchase records."
+description: "Trace a government contract award backward through Cloverleaf to the originating RFP or bid announcement and to the first spoken pain signal, then render the procurement arc as a timeline with a contact layer. Use whenever the user says trace this contract back, when did they first talk about this, show me the full procurement timeline, find recent awards and trace them back, what was the pain point before they awarded this contract, who won and when did it start, or asks for N recent contract awards in a given state. Use this instead of signal-dashboard when the goal is depth over time on one procurement event rather than breadth across active pain signals. Award sources are meeting documents, transcripts, and the purchase records."
 ---
 
 # RFP timeline
@@ -36,8 +36,8 @@ the results set the coverage.
 
 ## Step 1: find recent awards
 
-Three sources catch different things. Run the first two always, and the third when federal
-is in scope.
+Three sources catch different things. Run the first two always, and the third when federal or
+local contract records are in scope.
 
 **Source A, the written record.** Usually strongest, because officials rarely say a vendor
 name out loud but agendas print it.
@@ -65,18 +65,21 @@ run-meeting-keyword-search(
 )
 ```
 
-**Source C, federal awards.** `search-purchases` with an intent sentence, or
-`run-purchase-keyword-search` with exact terms. Verified 2026-09-02: dataset 1 is federal
-contract awards with USAspending style `CONT_AWD` ids, carrying `amount`, `vendor_name`,
-`department`, `purchase_description`, and `transaction_date`. Three caveats before you
-build on it:
+**Source C, award and contract records.** `run-purchase-keyword-search` with exact terms.
+`search-purchases` (semantic) returned zero rows on every probe on 2026-11-13, so treat a
+semantic zero as a tool gap. Verified 2026-11-13: dataset 1 is federal contract awards
+with USAspending style `CONT_AWD` ids, and local datasets sit beside it (seen: City of
+Dallas, County of Collin, Long Beach, Santa Clarita, Miami-Dade, Los Angeles MTA, County
+of Boone, Detroit, and Washington DC). Rows carry `amount`, `vendor_name`, `department`,
+`purchase_description`, and `transaction_date`. Three caveats before you build on it:
 
-- Coverage beyond federal is unverified as of 2026-09-02. Every sampled row was a federal
-  department. Do not claim state or local award coverage from this layer.
-- `department` is the awarding body. Ignore `organization_names`, which came back
-  identical on every row.
+- Find the awarding body by dataset. On federal rows `department` is the awarding body,
+  and `organization_names` is the whole federal org list. On local rows
+  `organization_names` is the awarding body and `department` is a division or null.
+- `amount` can be 0 or null, and `transaction_date` can be null. Local rows often carry
+  `start_date` and `end_date` for the contract term, which is a renewal timing signal.
 - There is no `cloverleaf_url` on a purchase row, so cite the award by `source_row_id`,
-  department, vendor, and date. A federal award also has no Cloverleaf org id you can
+  buyer, vendor, and date. A federal award also has no Cloverleaf org id you can
   trust, so Step 2a resolution has to run off the department name, and the backward trace
   works only where that body's meetings are ingested. When it is not, say so and present
   the award as a single node.
@@ -129,9 +132,9 @@ run-document-keyword-search(
 )
 ```
 
-Filter results to the `organization_id` from Step 2a. If nothing surfaces, fall back to
-`run-meeting-keyword-search` with the same terms plus RFP, ITB, and scope of work, and
-filter client side on the `organization_id` carried in the `meetings[]` array. Paginate
+Scope to the `organization_id` from Step 2a with `organizationIds`. If nothing surfaces,
+fall back to `run-meeting-keyword-search` with the same terms plus RFP, ITB, and scope of
+work, also scoped with `organizationIds`. Paginate
 with `page` rather than narrowing prematurely.
 
 Record the earliest hit where solicitation language attaches to the same project as the
@@ -173,8 +176,8 @@ Two different things live here.
 named in connection with the opportunity. Record name, title if stated, and which node it
 appeared in. If none, the cell reads **Not found in source text**. Never invent one.
 
-**5b, the buyer side roster.** `list-contacts(organizationId, limit = 25)`. Drop records
-where `removed_at` is set, check email domains and titles for jurisdiction contamination,
+**5b, the buyer side roster.** `list-contacts(organizationId, limit = 25)`. Dedupe by
+email, check email domains and titles for jurisdiction contamination,
 and say so explicitly when the roster comes back empty rather than skipping the org.
 
 ## Step 6: render the timeline
@@ -191,8 +194,8 @@ longest pain to award window, states covered), then one card per award:
 ```
 
 Each node carries a label, a date or a dashed "not indexed" marker, one sentence of
-context, and its `cloverleaf_url`. Never build a link yourself; a federal purchase node has
-no URL, so cite `source_row_id`, department, vendor, and date instead. Below the arc: the
+context, and its `cloverleaf_url`. Never build a link yourself; a purchase node has
+no URL, so cite `source_row_id`, buyer, vendor, and date instead. Below the arc: the
 vendor, value, and category, then the rep name or "Not found in source text", then the top
 one or two buyer contacts. The award node always renders, because it is the anchor.
 
