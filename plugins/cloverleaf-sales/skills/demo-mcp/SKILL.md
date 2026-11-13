@@ -83,12 +83,14 @@ Follow `cloverleaf-signal-search`. Silent must-dos:
 - **Check `search-insights` first.** It is free, already generated, and often already sitting
   on a qualifying signal. It is scoped to the authenticated user, so pass `states` for a
   territory. Many rows come back scored 0/10 by the insight's own relevance gate. Skip those
-  rather than re-litigating them.
+  rather than re-litigating them. For the rep's top signals, `get-signals-feed` returns the
+  scored signals with a numeric `score`, sorted by score, and is the faster read.
 - Fall back to `run-meeting-keyword-search` for exact vocabulary, with `mustIncludeTerms` and
   `proximity` from the profile's anchored terms, or `search-meetings` for intent. Both take
   `states` and both paginate with `page` and `perPage` up to 100.
 - **Always set a date window of 30 to 90 days.** With no date the tools look back seven days
-  and the board comes up empty, which must never happen on stage.
+  and the board comes up empty, which must never happen on stage. State wide `search-meetings`
+  times out above 30 days, so keep it to 30 or scope it with `organizationIds` or `counties`.
 - Search the pain, not the product. Never search the vendor's own name: that returns
   footprint mentions, which are existing business rather than opportunities.
 - Reject a signal outright when the vendor's own name shows up as already contacted, demoed,

@@ -52,9 +52,11 @@ Then present the file so the user gets a clickable link, or open it in a browser
   signals that matter, read the passage yourself and pass `vendor`, `amount`, and
   `procurement_stage` on a normalized signal. Use raw auto-ingest for fast triage of the
   whole result set.
-- **`search-meetings` returns no speaker.** Verified live 2026-09-02: transcript chunks
-  carry only an ID, text, start time, and score. Cards from that tool are speaker-blank by
-  design. Fill the name from `list-contacts` or `opportunity-enrichment`, and only after
+- **`search-meetings` returns no speaker.** Verified live 2026-11-13: transcript chunks
+  carry only an ID, text, start time, score, and `cloverleaf_url`. A hit also has a
+  `speakers` array, which lists people attached to the meeting (usually empty) and does not
+  say who spoke the excerpt. Cards from that tool are speaker-blank by design. Fill the
+  name from `list-contacts` or `opportunity-enrichment`, and only after
   confirming it, since speaker attribution anywhere in the platform is inference rather than
   data.
 - **Documents carry no organization name.** `search-documents` and

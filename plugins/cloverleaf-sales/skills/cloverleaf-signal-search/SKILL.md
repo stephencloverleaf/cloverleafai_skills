@@ -30,8 +30,11 @@ insights pass on the account, so checking it costs no search credit and often su
 scored signal a manual sweep would take several calls to rediscover. Pass `states`,
 because insights generate nationwide. Read the Signal Match score and the summary, but
 treat the score as a label on everything ingested rather than a selection threshold, and
-skip 0/10 gate excluded rows without re-litigating them. If the rep you are working for
-is not the authenticated account, pass their numeric `userId`.
+skip 0/10 rows without re-litigating them. If the rep you are working for
+is not the authenticated account, pass their numeric `userId`. When the rep wants their
+top signals, `get-signals-feed` returns the scored signals with a numeric `score`, sorted
+by score, and is the faster read. `search-insights` stays as the text search over
+everything the user owns.
 
 **Step 2. Fall back to a fresh sweep** only when insights are absent, stale (call it more
 than 90 days), or fail the guardrails below. Use `run-meeting-keyword-search` for precise
@@ -162,10 +165,10 @@ coverage, deduping, empty rosters, and the jurisdiction contamination check are 
 ## Territory sweep, one off
 
 `run-meeting-keyword-search` with `states` and `terms` is the cleanest path for a rep's
-territory. State is the finest geographic scope this tool has, so for county or city
-targeting resolve the org with `lookup-organization` and walk it with
-`list-organization-meetings`, or filter the `meetings[]` array client side on its
-`county` field.
+territory. For county or city targeting, add `counties` or `cities` to the same call. A city or
+county filter matches every body located there (school district, utility, county), so to
+scope to one government resolve the org with `lookup-organization`, pass
+`organizationIds`, or walk it with `list-organization-meetings`.
 
 For standing weekly coverage, a seen-id ledger, and the digest format, use
 `territory-monitor`. It owns the recurring form of this sweep and applies these same
@@ -180,11 +183,11 @@ The defect classes that survive into polished output are catalogued in
   have been filed under the wrong city, and one meeting labeled Indiana was Tasmania.
 - **Confirm every speaker name.** A populated `person` block is inference, not data. ASR
   mangles names ("Hellman Kava" for Helmin Caba, "Dela Flore" for Della Flora). Resolve
-  the real name from the roster plus a quick web check before it reaches a rep, a call
+  the real name from the roster, `search-verified-speakers`, and a quick web check before it reaches a rep, a call
   sheet, or outreach copy.
-- **Re-derive deep link timestamps from the transcript.** Search payload timestamps have
-  run 40 to 65 seconds off, which opens the link mid unrelated sentence in front of the
-  customer.
+- **Cite the excerpt's own `cloverleaf_url`.** It opens the meeting at that moment. If a
+  link opens mid sentence, re-derive the timestamp from the transcript before it reaches
+  a customer.
 - **An insight sentence is never a quote.** Corroborating one insight against another
   insight confirms nothing; only the transcript does.
 

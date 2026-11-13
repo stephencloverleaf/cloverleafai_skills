@@ -11,8 +11,10 @@ send. `cloverleaf-mcp-operations` carries the canonical field lists in
 
 Two parallel arrays joined on `id`.
 
-- `meeting_hits[]`: `id`, `time` (epoch ms), `hits`, `best_score`, `already_viewed`, and
-  `transcripts[]` where each chunk has `id`, `text`, `start_time`, `score`.
+- `meeting_hits[]`: `id`, `time` (epoch ms), `hits`, `best_score`, `already_viewed`,
+  `speakers[]`, and `transcripts[]` where each chunk has `id`, `text`, `start_time`,
+  `score`, `cloverleaf_url`. `speakers[]` lists people attached to the meeting, is usually
+  empty, and does not say who spoke the excerpt.
 - `meetings[]`: `id`, `cloverleaf_url`, `title`, `organization_id`, `organization_name`,
   `city`, `county`, `state` (full name, for example "Colorado"), `published_at`,
   `source_video_url`, `duration_seconds`, `is_spam`, `spam_certainty`, `user_marked_spam`,
@@ -23,8 +25,9 @@ the full state name to a two-letter code, and builds the jurisdiction as
 "<organization_name>, <ST>". **There is no speaker or contact block on this tool**, so cards
 are speaker-blank until a person is attached from `list-contacts` or enrichment.
 
-`total_hits` caps at 100 on the semantic tools; read it as "100 or more".
-`total_meeting_hits` is the true entity count.
+`total_hits` caps at 100 chunks on the semantic tools; read it as "100 or more".
+`total_meeting_hits` counts only the meetings inside those chunks, so at a `total_hits` of
+100 it is a floor, not the true count. For a true count use `run-meeting-keyword-search`.
 
 ## 2. search-insights, `{"insights": [...], "total": N}`
 
@@ -106,14 +109,16 @@ count stat. With one type, those hide themselves.
 
 ## Timestamp hint
 
-When `start_time` is present the card shows a readable "quote ~5:07 in" hint. Offsets carried
-over from a search payload have been observed wrong by 40 to 65 seconds, so re-derive the
-offset from the transcript before featuring a card in front of a customer.
+When `start_time` is present the card shows a readable "quote ~5:07 in" hint. On 2026-11-13
+excerpt `start_time` matched the transcript line exactly on eight of eight samples. If a
+link opens mid sentence, re-derive the offset from the transcript before featuring a card
+in front of a customer.
 
 ## Not a dashboard input: purchase records
 
 `search-purchases` and `run-purchase-keyword-search` rows do not belong on a signal board.
-They carry no `cloverleaf_url`, so a card could not cite one, and their `organization_ids`
-and `organization_names` are identical on every row (the whole federal organization list),
-so `department` is the only real buyer field. Use them in `opportunity-enrichment` as an
-award-stage cross-check instead. Coverage beyond federal is unverified as of 2026-09-02.
+They carry no `cloverleaf_url`, so a card could not cite one, and the buyer sits in a
+different field by dataset (`department` on federal rows, `organization_names` on local
+rows). They are award records rather than active signals. Use them in `opportunity-enrichment` as an award-stage cross-check instead.
+Coverage is federal plus local datasets, and `search-purchases` returned zero rows on every
+probe on 2026-11-13, so use `run-purchase-keyword-search`.

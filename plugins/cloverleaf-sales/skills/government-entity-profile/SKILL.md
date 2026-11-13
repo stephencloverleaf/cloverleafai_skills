@@ -50,11 +50,11 @@ be told not to expect follow up.
 
 ## Step 3: targeted passes
 
-Run the vendor's pain terms through `run-meeting-keyword-search` with `states`, then keep
-only hits on your org id. Run competitor and incumbent names second, one name per query,
+Run the vendor's pain terms through `run-meeting-keyword-search` with `organizationIds`
+set to your org id. Run competitor and incumbent names second, one name per query,
 for the displacement pass. Use `daysBack` 180 to 365 for an account profile.
 
-Run `run-document-keyword-search` on the same terms (pass `states`) for dollar figures,
+Run `run-document-keyword-search` on the same terms (pass `organizationIds`) for dollar figures,
 resolution language, and named vendor contract items. `document-signal-search` owns the
 vocabulary rules that keep this from returning boilerplate.
 
@@ -67,7 +67,7 @@ Walk backward in time. A topic raised across three meetings over eight months is
 initiative with a trajectory, not a one off comment. Collect recurring speakers: the
 person who keeps raising the problem is your champion, and the budget line owner is your
 economic buyer. Treat every name as unconfirmed until you check it against
-`list-contacts`, published minutes, or a signature block.
+`list-contacts`, `search-verified-speakers`, published minutes, or a signature block.
 
 ## Step 5: enrich off platform
 

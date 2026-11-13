@@ -1,89 +1,133 @@
 {
   "connector": "cloverleaf",
   "server": "Cloverleaf AI MCP (claude.ai connector)",
-  "snapshot": "2026-09-02",
-  "snapshot_source": "Live tool list observed in a Claude Code session on 2026-09-02",
+  "snapshot": "2026-11-13",
+  "snapshot_source": "Live tool list and full JSON schemas loaded through ToolSearch in a Claude Code desktop session on 2026-11-13. 31 tools, 11 of them added since the 2026-09-02 snapshot.",
   "tools": [
     {
+      "name": "budget-rollup",
+      "description": "One budget book's figures summed by department, category, fund, or division, largest first, with a grand total. Requires organizationId, meetingDocumentId, and by. Expenditures by default; lineType switches to revenue or all."
+    },
+    {
       "name": "get-bill",
-      "description": "One bill: number, title, status and progress, chamber, session, and sponsors with party and district."
+      "description": "One bill: number, title, description, status, chambers (originating body, pending committee), type, subjects, and sponsors. cloverleaf_url can be null when the bill has no viewable page."
     },
     {
       "name": "get-bill-documents",
-      "description": "A bill's texts, amendments, and supplements. Each carries a meeting_document_id readable through get-document."
+      "description": "A bill's texts, amendments, and supplements. Each carries a cloverleaf_url and a meeting_document_id readable through get-document."
     },
     {
       "name": "get-bill-events",
-      "description": "Scheduled hearings and floor votes for a bill, with date, time, and room."
+      "description": "Scheduled legislative calendar events for a bill, such as committee hearings and floor votes."
     },
     {
       "name": "get-bill-status-changes",
-      "description": "Merged status timeline for a bill. Filter event_kind == \"history\" for official status changes; major: true flags the big moves."
+      "description": "Merged status timeline for a bill: official status changes plus amendment, supplement, and calendar activity. Filter event_kind == \"history\" for official status changes."
+    },
+    {
+      "name": "get-budget-line-item",
+      "description": "One budget line item in full: every printed cell (each year and column, the primary one flagged), its book, department, fund, and category, and up to 20 neighbouring detail lines. Requires organizationId and lineItemId."
     },
     {
       "name": "get-document",
-      "description": "One document by ID. Also serves legislation documents, which carry organization_id: null and a bill_id."
+      "description": "One meeting document by ID. Also serves legislation documents, which carry organization_id: null and a bill_id."
     },
     {
       "name": "get-meeting",
-      "description": "Metadata, video URL, and cloverleaf_url for one meeting ID."
+      "description": "Metadata and cloverleaf_url for one meeting ID."
     },
     {
       "name": "get-meeting-transcripts",
-      "description": "Full transcript for one meeting. Large, and reserved for opportunity-enrichment on shortlisted signals."
+      "description": "A meeting's transcript lines ordered by start_time, paginated (page, perPage 1 to 500, default 200). total_transcripts reports the full line count."
+    },
+    {
+      "name": "get-signals-feed",
+      "description": "The authenticated user's Signals Feed: scored signals (insights at or above the user's score threshold, default 7) from their configured feed products and campaigns. Date range filters on signal creation and defaults to the last 30 days. perPage max 25. Returns facets for organizations, states, and campaigns."
+    },
+    {
+      "name": "list-budget-books",
+      "description": "The budget books extracted for an organization, newest fiscal year first, with meeting_document_id, stage, year columns, and a current flag. The entry point for every other budget tool."
+    },
+    {
+      "name": "list-budget-categories",
+      "description": "The budget category taxonomy for one budget book, with each category's parent and line count. Keys feed budget-rollup by category and the categories input of search-budget-line-items."
+    },
+    {
+      "name": "list-budget-departments",
+      "description": "The departments in one budget book, each with its key and detail line count. Keys feed the department filter on budget-rollup and search-budget-line-items."
     },
     {
       "name": "list-contacts",
-      "description": "Role-keyed civic contact roster (name, title, email, direct phone) by organization or geography."
+      "description": "Civic contact roster by organization ID or by state, county, and city name (exact match). limit and offset pagination."
     },
     {
       "name": "list-organization-meetings",
-      "description": "Walk one jurisdiction's meetings newest-first. The preferred single-entity tool."
+      "description": "Walk one jurisdiction's meetings newest first by published_at, with an optional case-insensitive title substring filter. No date filter; paginate."
+    },
+    {
+      "name": "list-salesforce-account-mappings",
+      "description": "Salesforce account to Cloverleaf organization mappings for the authenticated user's organization. Paginated."
+    },
+    {
+      "name": "list-territory-channels",
+      "description": "The authenticated user's territory channels (monitored organizations), filterable by name (q), stateId, and source (all, manual, auto)."
     },
     {
       "name": "lookup-organization",
-      "description": "Resolve a jurisdiction name to a numeric organization ID. Returns meeting_count and last_published_at per match; embedding-ranked, so read the whole list."
+      "description": "Resolve a jurisdiction name to a numeric organization ID by embedding similarity within a state or province. Returns id, name, meeting_count, and last_published_at per match, and a structured no-match result."
     },
     {
       "name": "run-document-keyword-search",
-      "description": "Lexical agenda, packet, and procurement text search. states works (verified [\"TX\"], 186 hits). sortBy accepts hits or meeting_date, with direction."
+      "description": "Lexical search over meeting documents. Filters: states, cities, counties, channelTypes, organizationIds, documentTypes. sortBy accepts hits or meeting_date, with direction. Default window is the last 7 days."
     },
     {
       "name": "run-legislation-keyword-search",
-      "description": "Lexical search over bill texts, amendments, and supplements."
+      "description": "Lexical search over bill texts, amendments, and supplements. states is the only geography filter. Default window is the past 7 days through the next 365 days."
     },
     {
       "name": "run-meeting-keyword-search",
-      "description": "Lexical transcript search with anchor terms (mustIncludeTerms plus proximity). perPage up to 100 with real page pagination; the old 25-meeting cap is gone."
+      "description": "Lexical transcript search with anchor terms (mustIncludeTerms plus proximity). Filters: states, cities, counties, channelTypes, organizationIds. Each snippet carries its own cloverleaf_url. Default window is the last 7 days."
     },
     {
       "name": "run-purchase-keyword-search",
-      "description": "Lexical keyword search over the same purchase records; `terms` must be an array (same shape as run-meeting-keyword-search). Parameter schema not published by the server as of 2026-09-02."
+      "description": "Lexical search over purchase records. Filters: states, departments, vendorNames, amount min and max, purchaseDatasetIds, countries, and integer id filters for organizations, cities, counties, and channelTypes. sortBy and direction. perPage default 10."
+    },
+    {
+      "name": "save-signal-to-tasks",
+      "description": "Write tool. Saves a signal from get-signals-feed to the authenticated user's Tasks list in Cloverleaf. Idempotent per signal. Channel and territory analysis signals cannot be saved."
+    },
+    {
+      "name": "search-budget-line-items",
+      "description": "Find budget line items about a topic in one budget book, by nearest budget categories plus printed label match. Requires organizationId and meetingDocumentId. limit max 50, skip for pagination."
     },
     {
       "name": "search-campaigns",
-      "description": "Saved campaigns as search-spec templates. Read-only, and the payload arrives inline."
+      "description": "Saved search campaigns for the authenticated user, paginated, each with its search terms and filters. Read only. total_campaigns reports the full count."
     },
     {
       "name": "search-documents",
-      "description": "Semantic natural-language search over meeting documents. The intent-based procurement finder; returns per-chunk score and per-document best_score."
+      "description": "Semantic search over meeting documents with matching text chunks. Filters: states, cities, counties, channelTypes, organizationIds, documentTypes (agenda, minutes, packet, notice, budget). Default window is the last 7 days."
     },
     {
       "name": "search-insights",
-      "description": "Already-generated AI insights with Signal Match scores. Free, and always the first call. Scoped to the authenticated user (pass userId for a teammate) and accepts states."
+      "description": "The user's AI-generated insights, scored or not, newest first. No date filter. limit default 5, max 200, with page. Results are cut to a 2000-character preview unless includeFullResult is true. Pass userId for a teammate and states for territory."
     },
     {
       "name": "search-legislation",
-      "description": "Semantic search over state legislation documents. Returns bill_id for the bill tools."
+      "description": "Semantic search over state legislation documents. Returns bill_id when known. states is the only geography filter. Default window is the past 7 days through the next 365 days."
     },
     {
       "name": "search-meetings",
-      "description": "Semantic natural-language transcript search. The fallback discovery tool when insights are thin."
+      "description": "Semantic transcript search. Filters: states, cities, counties, channelTypes, organizationIds. Up to snippetsPerHit excerpts per meeting (default 5), each a 500-character preview with its own cloverleaf_url. Default window is the last 7 days."
     },
     {
       "name": "search-purchases",
-      "description": "Semantic search over purchase and contract-award records (purchase_dataset_id 1: federal contract awards with USAspending-style CONT_AWD ids; fields amount, vendor_name, department, purchase_description, transaction_date, organization_ids). Params query, daysBack, page, perPage (numbers). Returns total_hits, page, per_page, purchases[]."
+      "description": "Semantic search over purchase records. Same filters as run-purchase-keyword-search except sortBy and direction. perPage default 10. Default window is the last 7 days."
+    },
+    {
+      "name": "search-verified-speakers",
+      "description": "People verified as meeting speakers by voice match. Returns first name, last name, organization, and title. query matches name or organization."
     }
   ],
-  "description_source": "Tool matrix in plugins/cloverleaf-sales/skills/cloverleaf-mcp-operations/SKILL.md (verified 2026-08-18), plus live observation of the purchases tools on 2026-09-02."
+  "description_source": "Condensed from the server's own tool descriptions and parameter schemas as returned by ToolSearch on 2026-11-13."
 }

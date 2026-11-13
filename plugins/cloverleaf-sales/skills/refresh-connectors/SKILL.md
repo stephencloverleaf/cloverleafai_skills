@@ -16,21 +16,25 @@ the field as it is and say so in the report.
 
 ## How enumeration actually works
 
-**In Claude Code, you get names but not descriptions.** The connector's tools arrive in
-the deferred tool list under an `mcp__SERVER_ID__` prefix that differs per account.
-Loading them with ToolSearch returns a schema of `{"type": "object"}` and a description
-that is only the tool name repeated (verified for the Cloverleaf connector on 2026-09-02).
-So enumerate by name from the deferred list, and get descriptions and parameters from one
-of two places:
+**In Claude Code, ToolSearch returns the full schema.** The connector's tools arrive in
+the deferred tool list under an `mcp__SERVER_ID__` prefix that differs per account. Load
+every tool in one ToolSearch `select:` call. Verified for the Cloverleaf connector on
+2026-11-13: the result carries the server's own description and the complete parameter
+schema (types, enums, limits, defaults) for each tool, and the harness sends numbers and
+arrays with their real types.
+
+On 2026-09-02 the same call returned only `{"type": "object"}` and the tool name. If a
+session behaves that way, get descriptions and parameters from one of two places:
 
 - The Claude desktop app's connector view, which shows the server's own descriptions.
 - A live probe. Call the tool with one plausible parameter and read the validation error:
   the server names the failing parameter and its expected type. Passing a string where an
   array is expected returns "expected array, received string", which confirms both the
   parameter name and its type without spending a real query.
-  In Claude Code sessions the harness sends every parameter as a string, so numeric and
-  array parameters cannot be sent from there at all. A successful call proves only the
-  string parameters; confirm the rest from validation errors or from the desktop app.
+
+A schema tells you what a tool accepts, not how it behaves. Defaults that change results,
+count caps, timeouts, and empty responses only show up in live calls, so test each tool
+before you document it.
 
 Record the bare tool name, dropping the server id prefix.
 

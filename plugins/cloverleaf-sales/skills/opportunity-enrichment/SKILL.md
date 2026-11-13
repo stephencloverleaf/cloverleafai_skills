@@ -42,12 +42,12 @@ first, because enrichment built on a defective signal looks complete and is wron
 - **Treat every speaker name as an inference.** `get-meeting-transcripts` returns
   `person: null` on essentially every line, and `run-meeting-keyword-search` populates a
   `person` block for the same lines, sometimes confidently wrong. Neither endpoint is
-  authoritative. Confirm a name against published minutes, an official roster, or a
-  signature block before putting it behind a quote.
+  authoritative. Confirm a name against published minutes, an official roster,
+  `search-verified-speakers`, or a signature block before putting it behind a quote.
 - **Read a window, not a quote.** Quotes get spliced across timestamps and truncated right
   before the speaker disqualifies the claim. Read around the cited offset.
-- **Re-derive timestamps from the transcript.** Deep-link offsets carried over from a search
-  payload have been wrong by 40 to 65 seconds, which opens the link mid-unrelated-sentence.
+- **Cite the excerpt's own `cloverleaf_url`.** It opens the meeting at that moment. If a link
+  opens mid-sentence, re-derive the timestamp from the transcript.
 - **Pull every session for the date.** The same meeting appears under several IDs, and long
   hearings split into morning and afternoon records. Check `is_spam`, `user_marked_spam`,
   `spam_certainty`, and whether `duration_seconds` matches the scheduled length.
@@ -140,25 +140,27 @@ Working notes:
 
 ### 4. Optional: cross-check the award stage against purchase records
 
-`search-purchases` (semantic) and `run-purchase-keyword-search` (lexical) read contract and
-purchase records. Use them only to answer "has this already been bought", which sets the
-stage field and can kill a lead.
+`run-purchase-keyword-search` reads contract and purchase records. `search-purchases`
+(semantic) returned zero rows on every probe on 2026-11-13, so treat a semantic zero as a
+tool gap. Use the keyword tool only to answer "has this already been bought", which sets
+the stage field and can kill a lead.
 
-Rules for reading a purchase row, verified live 2026-09-02:
+Rules for reading a purchase row, verified live 2026-11-13:
 
-- **`department` is the buyer.** Never present `organization_names` or `organization_ids`.
-  Every row carries the same 175 ids and 155 names, the entire federal organization list, so
-  those fields are a dataset-level association rather than the awarding body.
+- **Find the buyer by dataset.** On federal rows (`purchase_dataset_id` 1, ids starting
+  `CONT_AWD`) `department` is the buyer, and `organization_names` is the whole federal org
+  list. On local rows `organization_names` is the buyer and `department` is a division or
+  null.
 - **Purchase rows carry no `cloverleaf_url`.** Never build one. Cite the award by
-  `source_row_id`, `department`, `vendor_name`, and `transaction_date`.
-- **`amount` can be 0** on a contract modification, so a zero is not evidence of a small buy.
-  `start_date` and `end_date` were null on every sampled row.
-- Scores on a good query ran 0.73 to 0.79, so calibrate these like document hits rather than
-  like transcript hits.
+  `source_row_id`, buyer, `vendor_name`, and `transaction_date`.
+- **`amount` can be 0 or null** (a zero is not evidence of a small buy), and
+  `transaction_date` can be null. Local rows often carry `start_date` and `end_date` for
+  the contract term, which is a renewal timing signal.
 
-**Federal caveat:** `purchase_dataset_id` 1 is federal contract awards, with USAspending-style
-award IDs. Coverage beyond federal is unverified as of 2026-09-02, so an absence here says
-nothing about a city or county buy.
+**Coverage:** the layer holds federal contract awards plus local datasets (seen: City of
+Dallas, County of Collin, Long Beach, Santa Clarita, Miami-Dade, Los Angeles MTA, County of
+Boone, Detroit, and Washington DC). A city or county outside those datasets returns
+nothing here, so an absence says nothing about that buy.
 
 ## Frame it as MEDDPIC
 

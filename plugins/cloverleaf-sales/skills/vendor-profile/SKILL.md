@@ -210,7 +210,9 @@ local, or higher education?>
 
 - **Never omit a date window.** With no date, the meeting and document tools look back only
   seven days. Use a `daysBack` of 30 to 90, or `startDate` and `endDate`, which cannot be
-  combined with `daysBack`.
+  combined with `daysBack`. State wide semantic searches (`search-meetings`,
+  `search-documents`, `search-legislation`) time out above 30 days: keep them to 30, walk
+  longer ranges in 30 day slices, or scope with `organizationIds`, `counties`, or `cities`.
 - `states` empty means nationwide. Fill it only when a territory was named. It works on
   every search tool and accepts two-letter codes, full names, and Canadian provinces.
 - Keep terms specific. "ransomware resiliency" and "security operations center" beat
